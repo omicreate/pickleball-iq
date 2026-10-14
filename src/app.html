@@ -1,0 +1,619 @@
+<!doctype html><html lang="ja"><head>%%META%%<meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="stylesheet" href="%%ROOT%%fonts.css">
+<style>
+/* ピックルボールIQ「アメリカンポップ」:クリーム地+ピンクのドット、ネイビーの太縁とずらし影。結果は「選手カード+図鑑」 */
+:root{
+  --cloud:#f2efe8; --navy:#1b1b3a; --pool:#2f6fe4; --sky:#bfe3ff; --flamingo:#ff7eb6; --dot:#ffc9de;
+  --cherry:#e8433a; --sunny:#ffd23f; --pickle:#3dbe6b; --white:#ffffff; --sub:#5a5a75; --cream2:#fff7d6;
+  --f-head:"Dela Gothic One","Hiragino Sans",sans-serif;
+  --f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;
+  --f-num:"Bowlby One","Arial Black",sans-serif;
+  color-scheme:light;
+}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;color:var(--navy);font-family:var(--f-body);font-weight:700;font-size:16px;line-height:1.6;
+  background-color:var(--cloud);background-image:radial-gradient(var(--dot) 4px,transparent 4.5px);background-size:32px 32px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:540px;margin:0 auto;padding-block:28px 0;display:flex;flex-direction:column;gap:22px}
+.checker{height:24px;margin-top:28px;margin-inline:calc(-1*max(16px,env(safe-area-inset-left,0px)));
+  background-image:repeating-linear-gradient(90deg,var(--navy) 0 24px,var(--cloud) 24px 48px)}
+h1,h2{font-family:var(--f-head);font-weight:400;margin:0;line-height:1.3;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
+h3{font-family:var(--f-body);font-weight:900;margin:0;font-size:18px}
+.nb{display:inline-block}
+.q{font-family:var(--f-body);font-weight:900;font-size:clamp(21px,5.8vw,26px);line-height:1.5;margin:0;text-wrap:balance;word-break:keep-all;overflow-wrap:anywhere}
+h1{font-size:clamp(34px,10vw,50px)}
+h2{font-size:clamp(22px,6vw,28px)}
+p{margin:0}
+.box{background:var(--white);border:4px solid var(--navy);border-radius:20px;box-shadow:6px 6px 0 var(--navy);padding:18px}
+.tag{display:inline-block;font-weight:900;font-size:14px;line-height:1.4;padding:3px 12px;border:3px solid var(--navy);border-radius:10px;box-shadow:3px 3px 0 var(--navy);white-space:nowrap}
+.tag.red{background:var(--cherry);color:var(--white);transform:rotate(-3deg)}
+.tag.yellow{background:var(--sunny);transform:rotate(2deg)}
+.tag.green{background:var(--pickle)}
+.tag.sky{background:var(--sky)}
+.tag.pink{background:var(--flamingo)}
+.row{display:flex;gap:12px;flex-wrap:wrap;align-items:center}
+.btn{appearance:none;cursor:pointer;font:900 20px var(--f-body);color:var(--navy);background:var(--sunny);
+  border:4px solid var(--navy);border-radius:999px;box-shadow:6px 6px 0 var(--navy);padding:14px 24px;text-align:center;text-decoration:none;
+  display:inline-flex;justify-content:center;align-items:center;gap:8px;transition:transform .08s,box-shadow .08s}
+.btn:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--navy)}
+.btn.blue{background:var(--pool);color:var(--white)}
+.btn.white{background:var(--white)}
+.btn.small{font-size:15px;padding:8px 16px;box-shadow:4px 4px 0 var(--navy)}
+.btn:focus-visible,.opt:focus-visible,.dex a:focus-visible,.mini:focus-visible{outline:4px solid var(--flamingo);outline-offset:4px}
+.row .btn{flex:1 1 180px}
+.progress{display:grid;grid-template-columns:repeat(10,minmax(0,1fr));gap:5px}
+.progress i{height:12px;border:3px solid var(--navy);border-radius:999px;background:var(--white)}
+.progress i.on{background:var(--flamingo)}
+.qhead{display:flex;align-items:center;gap:12px}
+.qno{width:56px;height:56px;flex:none;border-radius:50%;background:var(--sunny);border:4px solid var(--navy);box-shadow:4px 4px 0 var(--navy);
+  font-family:var(--f-num);font-size:24px;display:flex;align-items:center;justify-content:center}
+.opts{display:flex;flex-direction:column;gap:14px}
+.opt{appearance:none;cursor:pointer;text-align:left;font:900 18px/1.35 var(--f-body);color:var(--navy);
+  display:flex;gap:14px;align-items:center;background:var(--white);border:4px solid var(--navy);border-radius:20px;
+  box-shadow:6px 6px 0 var(--navy);padding:12px 14px;transition:transform .08s,box-shadow .08s}
+.opt:hover{background:var(--cream2)}
+.opt:active,.opt.picked{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--navy)}
+.opt.picked{background:var(--sunny)}
+.badge{width:44px;height:44px;flex:none;border-radius:50%;border:3px solid var(--navy);font-family:var(--f-num);font-size:22px;
+  display:flex;align-items:center;justify-content:center}
+.b0{background:var(--cherry);color:var(--white)}.b1{background:var(--pool);color:var(--white)}.b2{background:var(--sunny)}.b3{background:var(--pickle)}
+.opt small{display:block;font-weight:700;font-size:13px;color:var(--sub);margin-top:2px}
+.hero{display:flex;flex-direction:column;gap:14px}
+.orbit{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:6px}
+.orbit svg{width:100%;height:auto;display:block}
+.orbit svg:nth-child(odd){animation:bob 2.6s ease-in-out infinite}
+.orbit svg:nth-child(even){animation:bob 2.6s ease-in-out -1.3s infinite}
+@keyframes bob{0%,100%{transform:translateY(0) rotate(-4deg)}50%{transform:translateY(-6px) rotate(4deg)}}
+.axes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.axes div{display:flex;gap:10px;align-items:center;font-weight:900;min-width:0}
+.axes svg{width:44px;height:44px;flex:none}
+.axes small{display:block;font-weight:700;font-size:13px;color:var(--sub);line-height:1.4}
+.meta{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.chip{font-family:var(--f-num);font-size:15px;background:var(--navy);color:var(--white);border-radius:999px;padding:3px 14px;letter-spacing:.04em}
+.stars{font-weight:900;font-size:14px;display:flex;align-items:center;gap:6px}
+.stars b{color:var(--cherry);font-size:18px;letter-spacing:1px}
+.card{background:var(--white);border:5px solid var(--navy);border-radius:28px;box-shadow:8px 8px 0 var(--navy);overflow:hidden}
+.card-top{display:grid;grid-template-columns:120px minmax(0,1fr);gap:14px;align-items:center;padding:18px;
+  border-bottom:5px solid var(--navy);background-image:repeating-linear-gradient(45deg,var(--band1,var(--flamingo)) 0 16px,#fff 16px 32px)}
+.card-top .mark{width:120px;height:120px}
+.card-top .mark svg{width:100%;height:100%;display:block}
+.card-name{font-family:var(--f-body);font-weight:900;font-size:clamp(23px,7vw,32px);line-height:1.25;letter-spacing:.02em;color:var(--navy);text-wrap:balance;
+  display:inline-block;background:var(--white);border:4px solid var(--navy);border-radius:14px;box-shadow:5px 5px 0 var(--navy);padding:6px 12px;transform:rotate(-2deg)}
+.card-catch{display:inline-block;margin-top:8px;background:var(--white);border:3px solid var(--navy);border-radius:12px;padding:3px 10px;font-weight:900;font-size:14px}
+.card-body{padding:18px;display:flex;flex-direction:column;gap:18px}
+.section-label{font-family:var(--f-num);font-size:13px;letter-spacing:.08em;color:var(--sub);margin-bottom:6px}
+.params{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px;align-items:center}
+.params .radar{width:100%;height:auto;display:block}
+.plist{display:flex;flex-direction:column;gap:6px}
+.prow{display:grid;grid-template-columns:22px 1fr auto auto;gap:8px;align-items:center;font-size:13px;font-weight:900}
+.prow svg{width:22px;height:22px}
+.prow .val{font-family:var(--f-num);font-size:14px;font-variant-numeric:tabular-nums;text-align:right;min-width:2.2em}
+.rank{font-family:var(--f-num);font-size:12px;width:24px;height:24px;border:2px solid var(--navy);border-radius:6px;display:flex;align-items:center;justify-content:center}
+.rank.S{background:var(--cherry);color:var(--white)}.rank.A{background:var(--sunny)}.rank.B{background:var(--sky)}.rank.C,.rank.D{background:var(--cloud)}
+.pow-total{display:flex;justify-content:space-between;align-items:baseline;border-top:3px dashed var(--navy);padding-top:6px;margin-top:2px;font-weight:900}
+.pow-total b{font-family:var(--f-num);font-weight:400;font-size:26px}
+.court{width:100%;height:auto;display:block}
+.lines{display:flex;flex-direction:column;gap:10px}
+.line{display:flex;gap:10px;align-items:flex-start}
+.line .tag{flex:none;margin-top:2px}
+.line p{min-width:0;font-weight:900}
+.pair{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.mini{display:flex;flex-direction:column;gap:6px;align-items:flex-start;text-decoration:none;color:var(--navy);
+  background:var(--cloud);border:3px solid var(--navy);border-radius:16px;padding:10px;box-shadow:4px 4px 0 var(--navy);min-width:0}
+.mini svg{width:56px;height:56px}
+.mini span{font-weight:900;font-size:13px;line-height:1.35}
+.share{font-weight:700;font-size:14px;background:var(--cloud);border:3px dashed var(--navy);border-radius:14px;padding:12px;white-space:pre-wrap;user-select:all}
+.dex{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.dex a{display:flex;flex-direction:column;align-items:center;gap:4px;text-decoration:none;color:var(--navy);
+  background:var(--white);border:3px solid var(--navy);border-radius:16px;padding:10px 6px;box-shadow:3px 3px 0 var(--navy);text-align:center;min-width:0}
+.dex a.me{background:var(--sunny)}
+.dex svg{width:58px;height:58px}
+.dex em{font-style:normal;font-family:var(--f-num);font-size:11px;color:var(--sub)}
+.dex span{font-weight:900;font-size:13px;line-height:1.35}
+.dex-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+footer{font-size:12px;color:var(--sub);text-align:center}
+.modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.mode{appearance:none;cursor:pointer;text-align:left;color:var(--navy);font-family:var(--f-body);border:4px solid var(--navy);border-radius:22px;
+  box-shadow:6px 6px 0 var(--navy);padding:16px;display:flex;flex-direction:column;gap:6px;transition:transform .08s,box-shadow .08s;min-width:0}
+.mode:active{transform:translate(4px,4px);box-shadow:2px 2px 0 var(--navy)}
+.mode b{font-family:var(--f-head);font-weight:400;font-size:22px;line-height:1.2}
+.mode small{font-weight:700;font-size:13px;line-height:1.4}
+.mode.quick{background:var(--sunny)}.mode.deep{background:var(--navy);color:var(--white)}
+.mode.deep .tag{background:var(--cherry);color:var(--white);border-color:var(--white);box-shadow:3px 3px 0 var(--cherry)}
+.mode:focus-visible,.lk:focus-visible{outline:4px solid var(--flamingo);outline-offset:4px}
+.gbar{height:16px;border:3px solid var(--navy);border-radius:999px;background:var(--white);overflow:hidden}
+.gbar i{display:block;height:100%;background:var(--flamingo);border-right:3px solid var(--navy);transition:width .2s}
+.gmeta{display:flex;justify-content:space-between;font-family:var(--f-num);font-size:14px}
+.stmt{background:var(--white);border:4px solid var(--navy);border-radius:24px;box-shadow:6px 6px 0 var(--navy);padding:24px 18px;min-height:140px;display:flex;align-items:center}
+
+.likert{display:flex;justify-content:space-between;align-items:center;gap:6px}
+.lk{appearance:none;cursor:pointer;border:4px solid var(--navy);border-radius:50%;background:var(--white);box-shadow:4px 4px 0 var(--navy);padding:0;transition:transform .08s,box-shadow .08s,background .1s}
+.lk:active,.lk.picked{transform:translate(3px,3px);box-shadow:1px 1px 0 var(--navy)}
+.lk.l0,.lk.l4{width:64px;height:64px}.lk.l1,.lk.l3{width:52px;height:52px}.lk.l2{width:42px;height:42px}
+.lk.l0:hover,.lk.l0.picked{background:var(--pickle)}.lk.l1:hover,.lk.l1.picked{background:#9fe0b5}
+.lk.l2:hover,.lk.l2.picked{background:var(--cloud)}.lk.l3:hover,.lk.l3.picked{background:#ffb3ae}.lk.l4:hover,.lk.l4.picked{background:var(--cherry)}
+.lk-labels{display:flex;justify-content:space-between;font-weight:900;font-size:14px}
+.report{background:var(--white);border:5px solid var(--navy);border-radius:28px;box-shadow:8px 8px 0 var(--navy);overflow:hidden}
+.report-head{background:var(--navy);color:var(--white);padding:14px 18px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.report-head h2{color:var(--white)}
+.report-body{padding:18px;display:flex;flex-direction:column;gap:22px}
+.conf{display:flex;gap:12px;align-items:center}
+.conf .meter{flex:1;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:4px}
+.conf .meter i{height:14px;border:3px solid var(--navy);border-radius:4px;background:var(--white)}
+.conf .meter i.on{background:var(--pickle)}
+.sliders{display:flex;flex-direction:column;gap:14px}
+.sl-lab{display:flex;justify-content:space-between;font-weight:900;font-size:14px}
+.sl-track{position:relative;height:18px;border:3px solid var(--navy);border-radius:999px;margin-top:4px;
+  background:linear-gradient(90deg,var(--l) 0 50%,var(--r) 50% 100%)}
+.sl-track::after{content:"";position:absolute;left:50%;top:-6px;bottom:-6px;border-left:3px dashed var(--navy)}
+.sl-dot{position:absolute;top:50%;width:30px;height:30px;margin:-15px 0 0 -15px;border-radius:50%;background:var(--white);border:4px solid var(--navy);box-shadow:3px 3px 0 var(--navy);z-index:1}
+.sl-note{font-size:13px;color:var(--sub);margin-top:4px}
+.sw{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.sw-item{border:3px solid var(--navy);border-radius:16px;padding:12px;display:flex;flex-direction:column;gap:6px;min-width:0}
+.sw-item svg{width:40px;height:40px}
+.sw-item b{font-weight:900}
+.sw-item p{font-size:14px}
+.grow-box{border:3px solid var(--navy);border-radius:16px;padding:14px;background:var(--cream2);display:flex;flex-direction:column;gap:10px}
+.drills{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:8px;counter-reset:d}
+.drills li{display:flex;gap:10px;align-items:flex-start;font-weight:900;font-size:15px;counter-increment:d}
+.drills li::before{content:counter(d);flex:none;width:28px;height:28px;border-radius:50%;background:var(--navy);color:var(--white);
+  font-family:var(--f-num);font-size:14px;display:flex;align-items:center;justify-content:center}
+.axis-notes{display:flex;flex-direction:column;gap:8px}
+.axis-notes div{display:grid;grid-template-columns:28px auto minmax(0,1fr);gap:8px;align-items:center;font-size:14px}
+.axis-notes svg{width:28px;height:28px}
+@media (max-width:420px){.sw{grid-template-columns:1fr}.lk.l0,.lk.l4{width:56px;height:56px}.lk.l1,.lk.l3{width:46px;height:46px}.lk.l2{width:38px;height:38px}}
+.pop{animation:pop .35s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.94) rotate(-1deg)}to{transform:none}}
+.stamp{animation:stamp .55s .2s cubic-bezier(.2,1.6,.4,1) both}
+@keyframes stamp{from{transform:scale(2.4) rotate(-40deg);opacity:0}to{transform:rotate(-6deg);opacity:1}}
+.grow{transform-origin:110px 110px;animation:grow .7s .45s cubic-bezier(.2,1.3,.4,1) both}
+@keyframes grow{from{transform:scale(0)}to{transform:scale(1)}}
+@media (max-width:420px){.params{grid-template-columns:1fr}.card-top{grid-template-columns:96px minmax(0,1fr)}.card-top .mark{width:96px;height:96px}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap" id="app"></div>
+<div class="checker" aria-hidden="true"></div>
+
+<script>
+// 公開URLとフォロー先が決まったらここに入れる(空なら表示しない)
+const SITE = "https://omicreate.github.io/pickleball-iq/";
+const SISTER_URL = "https://omicreate.github.io/pickle-asobi/?src=pb_iq_cross";
+const IG_URL = "https://www.instagram.com/pickleballiq_jp/";
+const TH_URL = "https://www.threads.net/@pickleballiq_jp";
+const typeUrl = k => SITE + "t/" + k + "/?src=share";
+
+// ===== LOGIC START =====
+const AXES=["pow","sta","trk","luv","nrd","vib"];
+const AX={
+  pow:{jp:"パワー",color:"var(--cherry)",ink:"#fff",desc:"とにかく強く打つ力"},
+  sta:{jp:"ねばり",color:"var(--pickle)",ink:"var(--navy)",desc:"何球でも返す根気"},
+  trk:{jp:"ずる賢さ",color:"var(--pool)",ink:"#fff",desc:"相手のすきを突く頭"},
+  luv:{jp:"愛され",color:"var(--flamingo)",ink:"var(--navy)",desc:"ペアと相手への気配り"},
+  nrd:{jp:"こだわり",color:"var(--sunny)",ink:"var(--navy)",desc:"道具・記録・ルールへの熱"},
+  vib:{jp:"ノリ",color:"var(--sky)",ink:"var(--navy)",desc:"場を楽しくする勢い"}
+};
+const T={
+ "pow-sta":["無限|スマッシャー","最後の1球が、いちばん速い","3時間打っても、最後の1球がいちばん速い。"],
+ "pow-trk":["フェイント|番長","打たないと見せて、打つ","打つふりをして、やっぱり打つ。"],
+ "pow-luv":["にっこり|スマッシャー","強い球、やさしい笑顔","強い球がアウトしたら、相手より先にあやまっている。"],
+ "pow-nrd":["スピードガン|博士","球の速さが、気になってしかたない","自分のスマッシュの速さを、だれかに測ってほしい。"],
+ "pow-vib":["全力|フルスイング","考えるより先に、振っている","ゆるい打ち合いは、3往復でがまんの限界。"],
+ "sta-pow":["逆転の|切り札","99球つないで、最後に決める","99球つないで、100球目だけ本気を出す。"],
+ "sta-trk":["キッチンの|主","100往復でも、へっちゃら","ラリーが長すぎて、となりのコートが先に終わる。"],
+ "sta-luv":["練習相手の|神","「あと1回」に、何回でも","「あと1回だけ」に、10回付き合っている。"],
+ "sta-nrd":["壁打ち|マイスター","雨の日も、壁と練習","壁打ちの回数を、毎日メモしている。"],
+ "sta-vib":["夕方の|エース","みんなが疲れたころ、元気100%","みんながヘトヘトのころ、いちばん元気。"],
+ "trk-pow":["急加速|マジシャン","ゆるい球から、いきなり速球","ゆるい打ち合いの最中、目だけ本気。"],
+ "trk-sta":["3球目の|魔術師","ふわっと落として、流れを変える","いいショットのあと、つい解説を始める。"],
+ "trk-luv":["笑顔の|策士","やさしい顔で、きびしいコース","「ごめんね」と言いながら、また足元に落とす。"],
+ "trk-nrd":["コートの|名探偵","相手のクセは、最初の1球で見抜く","あいさつのときに、もう作戦を立てている。"],
+ "trk-vib":["サプライズ|職人","まさかのショットで、みんなびっくり","一度決まった大技を、その日ずっと狙っている。"],
+ "luv-pow":["ナイスショット|係","相手のいい球にも、拍手","相手のスーパーショットに、本気で拍手している。"],
+ "luv-sta":["フェアプレーの|天使","迷ったら、相手に有利に","相手のギリギリの球に、相手より先に「イン!」と言う。"],
+ "luv-trk":["名アシスト","主役はいつも、となりの人","決めたのはペアなのに、いちばんうれしそう。"],
+ "luv-nrd":["みんなの|先生","教えるのが、大好き","初めての人を見つけると、気づけばとなりで教えている。"],
+ "luv-vib":["コートの|太陽","いるだけで、その場が明るくなる","スコアは忘れても、楽しかったことは全部覚えている。"],
+ "nrd-pow":["パドル|コレクター","その日の気分で、相棒を選ぶ","ミスするたびに、パドルを持ちかえている。"],
+ "nrd-sta":["スコア|記憶王","あの日の9-11、まだ覚えてる","3週間前の試合の、どの1点で負けたかを話せる。"],
+ "nrd-trk":["ルール|博士","細かいルールほど、わくわくする","だれも知らないルールを、こっそり教えてくれる。"],
+ "nrd-luv":["専属|カメラマン","みんなのベストショット、撮ってます","自分の動画は0本、みんなの動画は100本。"],
+ "nrd-vib":["おしゃれ|番長","ウェアから、気合いが入っている","まだ2回目なのに、ウェアが上下そろっている。"],
+ "vib-pow":["声出し|隊長","得点の声が、となりのコートまで","得点したときの声で、となりのコートの人がふり向く。"],
+ "vib-sta":["延長戦の|達人","照明が消えるまでが、本番","「最後の1試合」が、もう4回目。"],
+ "vib-trk":["空の|アーティスト","ロブで、空に虹をかける","ロブを上げた瞬間、もう勝った顔をしている。"],
+ "vib-luv":["友だち|製造機","はじめての人とも、すぐペア","その日はじめて会った人と、もう仲よし。"],
+ "vib-nrd":["新技|チャレンジャー","昨日見た技を、今日ためす","見たばかりの技を、本番でためしてみる。"]
+};
+// 名前は「|」の位置でだけ改行する(言葉の途中で折り返さない)
+const pn=k=>T[k][0].replace(/\|/g,"");
+const nm=k=>T[k][0].split("|").map(x=>`<span class="nb">${x}</span>`).join("");
+const cp=t=>t.split(/(?<=、)/).map(x=>`<span class="nb">${x}</span>`).join("");
+const KEYS=[];AXES.forEach(a=>AXES.forEach(b=>{if(a!==b)KEYS.push(a+"-"+b)}));
+const PAIR={pow:"4球に1回だけ「ゆっくり」と声をかけてあげて。",sta:"長いラリーの間、退屈そうな顔をしないであげて。",
+  trk:"作戦は3つ考えてくるけど、聞くのは1つでいいよ。",luv:"自分の得点も、たまには主張していいんだよ。",
+  nrd:"データと道具の話は、勝った日にしよう。",vib:"盛り上がりすぎて、スコアを忘れないでね。"};
+const TIP={pow:"強打3球に、ふわっと1球を混ぜるだけで勝率が化ける。",sta:"速い球は止めて、相手のキッチンへふわっと返す。これがリセット。",
+  trk:"3球目を相手のキッチンに落とせたら、試合の主導権はあなたのもの。",luv:"ポイント間のひと声で、ペアのミスは本当に減る。",
+  nrd:"ミスの多いショットを1つだけ選んで練習。それが最短ルート。",vib:"楽しい日を増やすことが、上達の一番の近道。"};
+// ライバル:じゃんけんの輪(ねばり>パワー>ずる賢さ>ねばり、こだわり>ノリ>愛され>こだわり)
+const BEATEN_BY={pow:"sta",sta:"trk",trk:"pow",vib:"nrd",luv:"vib",nrd:"luv"};
+// 相性:反対側の項目(パワー⇔愛され、ねばり⇔ノリ、ずる賢さ⇔こだわり)
+const COMP={pow:"luv",luv:"pow",sta:"vib",vib:"sta",trk:"nrd",nrd:"trk"};
+function enemyOf(k){const [a,b]=k.split("-");const e=BEATEN_BY[a];return e+"-"+(b===e?a:b);}
+function matchOf(k){const [a,b]=k.split("-");return COMP[a]+"-"+COMP[b];}
+
+const QS=[
+ {q:"初めてパドルを握った。第一声は?",o:[
+   ["「これ、卓球のでかいやつ?」","とりあえず振ってみる",["pow","vib"]],
+   ["「ルールブックある?」","まず仕組みを知りたい",["nrd","trk"]],
+   ["「誰と組む?」","大事なのはペア",["luv","vib"]],
+   ["「ネットの近く、行っていい?」","前が気になる",["trk","vib"]]]},
+ {q:"相手がずーっと、ゆるい球しか打ってこない。",o:[
+   ["付き合う。100往復でも","根くらべは得意",["sta","trk"]],
+   ["叩く。3往復が限界","我慢は苦手",["pow","luv"]],
+   ["油断した瞬間に、急に速く","付き合うふりをする",["trk","pow"]],
+   ["頭の上を越していく","空が空いている",["vib","trk"]]]},
+ {q:"ライン際の球。正直、見えなかった。",o:[
+   ["「イン!」(迷ったら相手に有利に)","聖人の判断",["luv","sta"]],
+   ["ペアの顔を見る","判断は丸投げ",["vib","luv"]],
+   ["「アウト!」(声だけは大きい)","自信は満タン",["vib","pow"]],
+   ["「今のはね…」と説明を始める","教えたくなる",["luv","nrd"]]]},
+ {q:"ネット前の「キッチン」は、ボレー禁止のゾーン。聞いた感想は?",o:[
+   ["住みたい","そこが一番楽しそう",["sta","luv"]],
+   ["ギリギリを攻めたい","線の上で生きたい",["trk","luv"]],
+   ["一歩も入らない自信がある","きっちりしてるので",["nrd","sta"]],
+   ["関係ない。後ろから叩く","パワーで解決",["pow","sta"]]]},
+ {q:"ペアが同じミスを3回した。",o:[
+   ["「ドンマイ!」(3回目)","笑顔は崩さない",["luv","pow"]],
+   ["次の作戦を耳打ちする","頭で取り返す",["trk","sta"]],
+   ["フォームを直してあげる","つい口が出る",["nrd","luv"]],
+   ["「全部こっちで返す!」","守りで取り返す",["sta","pow"]]]},
+ {q:"パドルを買うなら、決め手は?",o:[
+   ["いちばん飛ぶやつ","威力こそ正義",["pow","nrd"]],
+   ["レビューを全部読む","比較表を作る",["nrd","pow"]],
+   ["見た目がかわいい","テンションが大事",["nrd","vib"]],
+   ["手になじむ軽いやつ","操作性で選ぶ",["sta","nrd"]]]},
+ {q:"試合が終わった。まず何をする?",o:[
+   ["みんなでごはんの相談","むしろ本番",["luv","vib"]],
+   ["スコア表を見返す","全部記録してある",["nrd","sta"]],
+   ["自分のスーパーショットを動画で見返す","何度でも見る",["vib","nrd"]],
+   ["隣のコートの初心者に話しかけに行く","友だちが増える",["vib","luv"]]]},
+ {q:"好きな言葉に近いのは?",o:[
+   ["継続は力なり","",["sta","vib"]],
+   ["先手必勝","",["pow","trk"]],
+   ["急がば回れ","",["trk","nrd"]],
+   ["笑う門には福来る","",["vib","sta"]]]},
+ {q:"雨で試合が中止になった。",o:[
+   ["家で筋トレ","パワーを貯める日",["pow","sta"]],
+   ["プロの試合動画を研究","配球をメモ",["trk","nrd"]],
+   ["みんなでカラオケ","結局集まる",["luv","vib"]],
+   ["壁に向かって1人で打つ","雨でもやる",["sta","trk"]]]},
+ {q:"ペアに選ぶなら、どんな人?",o:[
+   ["とにかく強い人","勝ちたい",["pow","trk"]],
+   ["最後まであきらめない人","信頼できる",["sta","luv"]],
+   ["作戦を一緒に考えられる人","頭脳戦が好き",["trk","luv"]],
+   ["一緒にいて楽しい人","笑えたら勝ち",["luv","trk"]]]}
+];
+// 選んだ選択肢の1つ目の項目に+2、2つ目に+1
+const MAX={};AXES.forEach(a=>MAX[a]=0);
+QS.forEach(q=>AXES.forEach(a=>{MAX[a]+=Math.max(...q.o.map(o=>o[2][0]===a?2:o[2][1]===a?1:0))}));
+// 順位は「その項目の平均からどれだけ上か」で決める(項目ごとの出やすさの差をならす)
+const MEAN={},SD={};
+AXES.forEach(a=>{let m=0,v=0;QS.forEach(q=>{const xs=q.o.map(o=>o[2][0]===a?2:o[2][1]===a?1:0);const mu=xs.reduce((x,y)=>x+y)/4;m+=mu;v+=xs.reduce((x,y)=>x+(y-mu)**2,0)/4;});MEAN[a]=m;SD[a]=Math.sqrt(v);});
+function scoreOf(picks){
+  const s={},last={};AXES.forEach(a=>{s[a]=0;last[a]=-1});
+  picks.forEach((i,qi)=>{const [p,q]=QS[qi].o[i][2];s[p]+=2;s[q]+=1;last[p]=qi;});
+  const pct={},z={};AXES.forEach(a=>{z[a]=(s[a]-MEAN[a])/SD[a];pct[a]=Math.max(3,Math.min(99,Math.round(50+z[a]*18)));});
+  const order=[...AXES].sort((a,b)=>(pct[b]-pct[a])||(z[b]-z[a])||(last[b]-last[a])||(AXES.indexOf(a)-AXES.indexOf(b)));
+  return {pct,key:order[0]+"-"+order[1]};
+}
+// ---- ガチ分析:30問・5段階。各項目5問、うち1問は逆向き(r=1) ----
+const GITEMS={
+ pow:[["強い球を打つと、すっきりする。",0],["チャンスボールは、迷わず思い切り打つ。",0],["ラリーが続くと、早く決めたくなる。",0],["試合では、守るより攻めたい。",0],["強く打つより、ていねいに返すほうが好きだ。",1]],
+ sta:[["長いラリーになるほど、楽しくなる。",0],["相手の速い球も、なんとか返せる気がする。",0],["同じ練習を何十回くり返しても、平気だ。",0],["負けていても、最後まであきらめない。",0],["ラリーが長くなると、集中が切れやすい。",1]],
+ trk:[["相手の苦手そうなところを、つい狙ってしまう。",0],["打つ前に、相手の立ち位置を見ている。",0],["相手の予想をわざと外すのが、好きだ。",0],["力よりも、コースで点を取りたい。",0],["作戦を考えるより、その場の感覚で打つ。",1]],
+ luv:[["ペアがミスしたら、まず声をかける。",0],["相手のいいショットには、拍手したくなる。",0],["微妙な判定は、相手に有利にとる。",0],["ペアが気持ちよくプレーできるように動く。",0],["試合中は、自分のプレーのことで頭がいっぱいになる。",1]],
+ nrd:[["パドルやシューズの違いが、気になる。",0],["自分の試合の結果を、記録しておきたい。",0],["ルールの細かいところまで、知りたい。",0],["うまい人のフォームを、動画で研究する。",0],["道具やルールは、だいたいでいい。",1]],
+ vib:[["初めての人と組むのが、楽しみだ。",0],["点を取ったら、声を出して喜ぶ。",0],["まわりが盛り上がると、プレーも良くなる。",0],["新しい技は、すぐ試合でためしたい。",0],["静かに集中してプレーしたい。",1]]
+};
+// 同じ項目が続かないよう、1周ごとに項目の順番をずらして並べる
+const GQ=[];for(let r=0;r<5;r++)for(let j=0;j<6;j++){const a=AXES[(j+r*2)%6];GQ.push({a,t:GITEMS[a][r][0],rev:GITEMS[a][r][1]});}
+// ans:1(そう思わない)〜5(そう思う)
+function gScoreOf(ans){
+  const sum={},strong={};AXES.forEach(a=>{sum[a]=0;strong[a]=0});
+  ans.forEach((v,i)=>{const q=GQ[i];let x=v-3;if(q.rev)x=-x;sum[q.a]+=x;if(x===2)strong[q.a]++;});
+  const pct={};AXES.forEach(a=>pct[a]=Math.round((sum[a]+10)/20*100));
+  const order=[...AXES].sort((a,b)=>(pct[b]-pct[a])||(strong[b]-strong[a])||(AXES.indexOf(a)-AXES.indexOf(b)));
+  return {pct,order,key:order[0]+"-"+order[1]};
+}
+// ===== LOGIC END =====
+
+// ---- ガチ分析の文章 ----
+const STRENGTH={pow:"チャンスを一発で決めきる力。相手は甘い球を打てなくなります。",
+  sta:"どんな球でも返し続ける力。相手のミスを待てるのは大きな武器です。",
+  trk:"相手を見て、空いているところを突く力。力の差を頭でうめられます。",
+  luv:"ペアを前向きにする力。ダブルスでは、これが勝ち負けを分けます。",
+  nrd:"調べて、記録して、直す力。上達のスピードがいちばん速いタイプです。",
+  vib:"場を楽しくする力。新しい技にも人にも、すぐなじめます。"};
+const GROW={pow:"決めきる力が伸びしろ。チャンスで迷わず打てると、試合がぐっと楽になります。",
+  sta:"つなぐ力が伸びしろ。あと3球がまんできると、相手が先にミスします。",
+  trk:"相手を見る力が伸びしろ。打つ前に1回だけ、相手の位置を見てみましょう。",
+  luv:"ペアとの声かけが伸びしろ。ひと言ふやすだけで、ダブルスは強くなります。",
+  nrd:"ふり返る力が伸びしろ。記録を1つつけるだけで、直すところが見えてきます。",
+  vib:"楽しむ力が伸びしろ。肩の力が抜けると、ミスも減ります。"};
+const DRILL={pow:["ネットの白帯の少し上を通す速い球(ドライブ)を、10球連続で","高く上がった球を上から打ち下ろす(スマッシュ)を20球","サーブをベースラインの近くまで深く入れる練習"],
+  sta:["キッチンに短く落とす球(ディンク)を、30往復続ける","速い球をやわらかく止めて、相手のキッチンに返す(リセット)を20球","1ゲームのあいだ、ミスを3つ以内におさえる"],
+  trk:["相手の足元と、2人のまん中(センター)を狙って打つ","3球目を相手のキッチンにふわっと落とす(3球目ドロップ)を20球","毎球、打つ前に相手の位置を見ることを約束にする"],
+  luv:["ポイントのあいだに、ペアとひと言かわす","「マイ!」「ユー!」の声で、どちらが取るかを決める","試合のあと、相手といいショットを1つずつ伝え合う"],
+  nrd:["試合のスコアと、ミスの種類をメモする","ルールの「キッチン」と「サーブ」のところを読み直す","自分のプレーを動画で1本撮って、見返す"],
+  vib:["初めての人と1試合組んでみる","点を取ったら、ペアとハイタッチする","練習の最後に、やったことのない技を1つためす"]};
+const BAND={S:"とても高い",A:"高い",B:"ふつう",C:"ひかえめ",D:"これから"};
+const SLIDERS=[["pow","sta","攻め","つなぎ","var(--cherry)","var(--pickle)"],["vib","nrd","感覚","理論","var(--sky)","var(--sunny)"],["trk","luv","自分で決める","ペアを生かす","var(--pool)","var(--flamingo)"]];
+function analysis(pct,order){
+  const gap=pct[order[1]]-pct[order[2]];
+  const conf=gap>=20?5:gap>=12?4:gap>=6?3:gap>=2?2:1;
+  return {conf,gap,runner:order[0]+"-"+order[2],partner:order[5]+"-"+order[4],top:[order[0],order[1]],low:order[5]};
+}
+function reportHTML(pct,an){
+  const confText=["","ほかのタイプとも近い、バランス型","ほかのタイプとも近い","だいたいこのタイプ","はっきりこのタイプ","まちがいなくこのタイプ"][an.conf];
+  return `<div class="report pop">
+    <div class="report-head"><h2>ガチ分析レポート</h2><span class="chip" style="background:var(--cherry)">REPORT</span></div>
+    <div class="report-body">
+      <div>
+        <div class="section-label">判定の確かさ</div>
+        <div class="conf"><div class="meter">${[1,2,3,4,5].map(i=>`<i class="${i<=an.conf?"on":""}"></i>`).join("")}</div><b>${confText}</b></div>
+        <p class="sl-note">2位と3位のパラメータの差:${an.gap}点。差が小さいほど、ほかのタイプの性格もあわせ持っています。</p>
+        <a class="mini" href="#${an.runner}" style="margin-top:10px;flex-direction:row;align-items:center"><span class="tag sky">次に近い</span>${mark(an.runner)}<span>${nm(an.runner)}</span></a>
+      </div>
+      <div>
+        <div class="section-label">プレースタイル</div>
+        <div class="sliders">${SLIDERS.map(([x,y,lx,ly,cl,cr])=>{const p=Math.max(4,Math.min(96,50-(pct[x]-pct[y])/2));
+          const lean=Math.abs(pct[x]-pct[y])<8?"どちらにもかたよらない":(pct[x]>pct[y]?lx:ly)+"寄り";
+          return `<div><div class="sl-lab"><span>${lx}</span><span>${ly}</span></div>
+          <div class="sl-track" style="--l:${cl};--r:${cr}"><span class="sl-dot" style="left:${p}%"></span></div>
+          <p class="sl-note">${lean}(${AX[x].jp}${pct[x]} / ${AX[y].jp}${pct[y]})</p></div>`}).join("")}</div>
+      </div>
+      <div>
+        <div class="section-label">強み</div>
+        <div class="sw">${an.top.map(a=>`<div class="sw-item">${axisIcon(a)}<b>${AX[a].jp} ${pct[a]}</b><p>${STRENGTH[a]}</p></div>`).join("")}</div>
+      </div>
+      <div class="grow-box">
+        <div class="row" style="gap:10px">${axisIcon(an.low).replace("<svg",'<svg style="width:40px;height:40px"')}<b>伸びしろ:${AX[an.low].jp} ${pct[an.low]}</b></div>
+        <p>${GROW[an.low]}</p>
+        <div class="section-label" style="margin:0">おすすめ練習メニュー</div>
+        <ol class="drills">${DRILL[an.low].map(d=>`<li>${d}</li>`).join("")}</ol>
+      </div>
+      <div>
+        <div class="section-label">あなたを補うパートナー</div>
+        <a class="mini" href="#${an.partner}" style="flex-direction:row;align-items:center"><span class="tag green">補い合う</span>${mark(an.partner)}<span>${nm(an.partner)}<br><small style="font-weight:700;color:var(--sub)">あなたの低い2項目が、この人の高い2項目</small></span></a>
+      </div>
+      <div>
+        <div class="section-label">6項目の読み方</div>
+        <div class="axis-notes">${AXES.map(a=>`<div>${axisIcon(a)}<span class="rank ${rankOf(pct[a])}">${rankOf(pct[a])}</span><span><b>${AX[a].jp}</b>は${BAND[rankOf(pct[a])]}(${pct[a]})</span></div>`).join("")}</div>
+      </div>
+    </div></div>`;
+}
+
+// レア度の元データ:全1,048,576通りの回答パターンのうち、そのタイプになる割合(実際の利用者の割合ではない)
+const SHARE_PCT={"pow-sta":3.93,"pow-trk":4.06,"pow-luv":3.23,"pow-nrd":3.21,"pow-vib":3.38,"sta-pow":2.83,"sta-trk":2.79,"sta-luv":4,"sta-nrd":3.38,"sta-vib":3.79,"trk-pow":2.31,"trk-sta":3.67,"trk-luv":3.22,"trk-nrd":5.1,"trk-vib":3.4,"luv-pow":3.27,"luv-sta":2.74,"luv-trk":2.88,"luv-nrd":2.25,"luv-vib":4.56,"nrd-pow":2.48,"nrd-sta":3.95,"nrd-trk":5.02,"nrd-luv":3.33,"nrd-vib":2.6,"vib-pow":3.41,"vib-sta":2.9,"vib-trk":3.33,"vib-luv":2.79,"vib-nrd":2.17};
+
+function rankOf(v){return v>=80?"S":v>=60?"A":v>=40?"B":v>=20?"C":"D";}
+function protoPct(k){const [a,b]=k.split("-");const p={};AXES.forEach((x,i)=>p[x]=28+((i*17+a.charCodeAt(0))%24));p[a]=90;p[b]=72;return p;}
+
+// ===== マーク:外形と色=1位の項目、中の記号=2位の項目 =====
+function starPts(n,r1,r2,cx,cy){let p=[];for(let i=0;i<n*2;i++){const r=i%2?r2:r1,t=Math.PI*i/n;p.push((cx+r*Math.sin(t)).toFixed(1)+","+(cy-r*Math.cos(t)).toFixed(1));}return p.join(" ");}
+function polyPts(n,r,cx,cy,rot){let p=[];for(let i=0;i<n;i++){const t=2*Math.PI*i/n+rot;p.push((cx+r*Math.sin(t)).toFixed(1)+","+(cy-r*Math.cos(t)).toFixed(1));}return p.join(" ");}
+const SHAPE={
+  pow:(f,s)=>`<polygon points="${starPts(10,57,41,60,60)}" fill="${f}" stroke="${s}" stroke-width="6" stroke-linejoin="round"/>`,
+  sta:(f,s)=>`<rect x="9" y="9" width="102" height="102" rx="26" fill="${f}" stroke="${s}" stroke-width="6"/>`,
+  trk:(f,s)=>`<polygon points="60,3 117,60 60,117 3,60" fill="${f}" stroke="${s}" stroke-width="6" stroke-linejoin="round"/>`,
+  luv:(f,s)=>`<circle cx="60" cy="60" r="54" fill="${f}" stroke="${s}" stroke-width="6"/>`,
+  nrd:(f,s)=>`<polygon points="${polyPts(6,58,60,60,Math.PI/6)}" fill="${f}" stroke="${s}" stroke-width="6" stroke-linejoin="round"/>`,
+  vib:(f,s)=>`<polygon points="${starPts(14,57,48,60,60)}" fill="${f}" stroke="${s}" stroke-width="6" stroke-linejoin="round"/>`
+};
+const GLYPH={
+  pow:c=>`<polygon points="58,6 22,58 46,58 38,96 78,40 54,40 66,6" fill="${c}"/>`,
+  sta:c=>`<path d="M50 50 C40 30,12 30,12 50 C12 70,40 70,50 50 C60 30,88 30,88 50 C88 70,60 70,50 50Z" fill="none" stroke="${c}" stroke-width="11" stroke-linejoin="round"/>`,
+  trk:c=>`<path d="M8 50 Q50 12 92 50 Q50 88 8 50Z" fill="none" stroke="${c}" stroke-width="10" stroke-linejoin="round"/><circle cx="50" cy="50" r="14" fill="${c}"/>`,
+  luv:c=>`<path d="M50 88 C16 65 8 46 18 31 C28 17 46 19 50 36 C54 19 72 17 82 31 C92 46 84 65 50 88Z" fill="${c}"/>`,
+  nrd:c=>`<circle cx="42" cy="42" r="23" fill="none" stroke="${c}" stroke-width="11"/><line x1="59" y1="59" x2="86" y2="86" stroke="${c}" stroke-width="14" stroke-linecap="round"/>`,
+  vib:c=>`<line x1="66" y1="14" x2="66" y2="70" stroke="${c}" stroke-width="10" stroke-linecap="round"/><path d="M66 14 Q86 18 88 40" fill="none" stroke="${c}" stroke-width="10" stroke-linecap="round"/><ellipse cx="48" cy="72" rx="19" ry="14" fill="${c}"/>`
+};
+function markInner(a,b){
+  return `<g transform="translate(6 6)">${SHAPE[a]("var(--navy)","var(--navy)")}</g>${SHAPE[a](AX[a].color,"var(--navy)")}<g transform="translate(26 26) scale(.68)">${GLYPH[b](AX[a].ink)}</g>`;
+}
+function mark(k){const [a,b]=k.split("-");return `<svg viewBox="-4 -4 134 134" role="img" aria-label="${pn(k)}のマーク">${markInner(a,b)}</svg>`;}
+function axisIcon(a){return `<svg viewBox="-4 -4 134 134" aria-hidden="true">${SHAPE[a](AX[a].color,"var(--navy)")}<g transform="translate(26 26) scale(.68)">${GLYPH[a](AX[a].ink)}</g></svg>`;}
+
+// ===== レーダー =====
+function radar(pct){
+  const cx=110,cy=110,R=76;
+  const pt=(i,r)=>{const t=-Math.PI/2+i*Math.PI/3;return [(cx+r*Math.cos(t)).toFixed(1),(cy+r*Math.sin(t)).toFixed(1)];};
+  const ring=f=>AXES.map((_,i)=>pt(i,R*f).join(",")).join(" ");
+  const v=a=>R*Math.max(.06,pct[a]/100);
+  const data=AXES.map((a,i)=>pt(i,v(a)).join(",")).join(" ");
+  const labels=AXES.map((a,i)=>{const [x,y]=pt(i,R+22);return `<text x="${x}" y="${(+y+5).toFixed(1)}" text-anchor="middle" font-family="Zen Maru Gothic,sans-serif" font-weight="900" font-size="13" fill="var(--navy)">${AX[a].jp}</text>`}).join("");
+  return `<svg class="radar" viewBox="0 0 220 220" role="img" aria-label="パラメータ:${AXES.map(a=>AX[a].jp+pct[a]).join("、")}">
+    <polygon points="${ring(1)}" fill="var(--cloud)" stroke="var(--navy)" stroke-width="3" stroke-linejoin="round"/>
+    <polygon points="${ring(.66)}" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    <polygon points="${ring(.33)}" fill="none" stroke="var(--navy)" stroke-width="1.5" stroke-dasharray="4 4"/>
+    ${AXES.map((_,i)=>`<line x1="${cx}" y1="${cy}" x2="${pt(i,R)[0]}" y2="${pt(i,R)[1]}" stroke="var(--navy)" stroke-width="1.5"/>`).join("")}
+    <g class="grow"><polygon points="${data}" fill="var(--flamingo)" fill-opacity=".85" stroke="var(--navy)" stroke-width="3.5" stroke-linejoin="round"/>
+    ${AXES.map((a,i)=>{const [x,y]=pt(i,v(a));return `<circle cx="${x}" cy="${y}" r="5.5" fill="${AX[a].color}" stroke="var(--navy)" stroke-width="2.5"/>`}).join("")}</g>
+    ${labels}</svg>`;
+}
+
+// ===== コート(ピックルボールIQと同じ遠近図) =====
+const POS={pow:{x:640,y:560},sta:{x:440,y:420},trk:{x:575,y:425},luv:{x:480,y:500},nrd:{x:360,y:560},vib:{x:165,y:395}};
+function court(k){
+  const [a,b]=k.split("-"), p=POS[a];
+  return `<svg class="court" viewBox="0 0 1000 680" role="img" aria-label="ピックルボールのコート図。マークの位置があなたの定位置">
+    <polygon points="230,40 770,40 980,640 20,640" fill="var(--sky)" stroke="var(--navy)" stroke-width="7" stroke-linejoin="round"/>
+    <polygon points="300,90 700,90 860,600 140,600" fill="var(--pool)" stroke="#fff" stroke-width="6"/>
+    <polygon points="252,250 748,250 790,380 210,380" fill="var(--flamingo)" stroke="#fff" stroke-width="6"/>
+    <line x1="500" y1="90" x2="500" y2="250" stroke="#fff" stroke-width="6"/>
+    <line x1="500" y1="380" x2="500" y2="600" stroke="#fff" stroke-width="6"/>
+    <line x1="232" y1="315" x2="768" y2="315" stroke="var(--navy)" stroke-width="10" stroke-linecap="round"/>
+    <text x="500" y="365" text-anchor="middle" font-family="Bowlby One,sans-serif" font-size="30" fill="#fff">KITCHEN</text>
+    <g transform="translate(${p.x-48} ${p.y-48}) scale(.74)">${markInner(a,b)}</g></svg>`;
+}
+
+// ===== 画面 =====
+const app=document.getElementById("app");
+let picks=[];
+const NO=k=>String(KEYS.indexOf(k)+1).padStart(2,"0");
+
+function dex(cur){
+  return `<div class="dex">${KEYS.map(k=>`<a href="#${k}" class="${k===cur?"me":""}">${mark(k)}<em>No.${NO(k)}</em><span>${nm(k)}</span></a>`).join("")}</div>`;
+}
+
+function intro(){
+  app.innerHTML=`
+  <div class="hero pop">
+    <div class="row"><span class="tag red">10問・約1分</span><span class="tag yellow">全30タイプ</span><span class="tag sky">パラメータ付き</span></div>
+    <h1>あなたは、<br>コートの<br>どこに住む?</h1>
+    <div class="orbit" aria-hidden="true">${["pow-vib","sta-trk","trk-vib","luv-vib","nrd-vib","vib-trk"].map(k=>mark(k)).join("")}</div>
+  </div>
+  <p>10問に答えると、あなたの6つのパラメータを計算します。上位2つの組み合わせで、全30タイプのどれかに決まります。</p>
+  <div class="box"><h3 style="margin-bottom:12px">はかる6つのパラメータ</h3>
+    <div class="axes">${AXES.map(a=>`<div>${axisIcon(a)}<span>${AX[a].jp}<small>${AX[a].desc}</small></span></div>`).join("")}</div>
+    <p style="margin-top:12px;font-size:13px;color:var(--sub)">マークの形と色は1位のパラメータ、中の記号は2位のパラメータを表します。</p></div>
+  <div class="modes">
+    <button class="mode quick" id="start"><span class="tag red" style="align-self:flex-start">10問・約1分</span><b>さくっと診断</b><small>4つの選択肢から選ぶだけ。友だちとワイワイ遊ぶならこちら。</small></button>
+    <button class="mode deep" id="gstart"><span class="tag" style="align-self:flex-start">30問・約3分</span><b>ガチ分析</b><small>5段階で答える本格版。強み・伸びしろ・練習メニューまで出ます。</small></button>
+  </div>
+  <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
+  ${dex(null)}
+  <a class="box" href="${SISTER_URL}" style="text-decoration:none;color:inherit;display:block"><span class="tag green">姉妹アプリ</span><h3 style="margin-top:8px">ピクルくんとあそぼ</h3><p style="font-size:14px;font-weight:700">親子・なかまで遊べるミニゲーム集。</p></a>
+  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
+  document.getElementById("start").onclick=()=>{picks=[];question();};
+  document.getElementById("gstart").onclick=()=>{gans=[];gQuestion();};
+  bindDex();
+}
+
+let gans=[];
+const LK=["そう思う","ややそう思う","どちらでもない","ややちがう","ちがう"];
+function gQuestion(){
+  const qi=gans.length, q=GQ[qi];
+  app.innerHTML=`
+  <div class="gmeta"><span>ガチ分析</span><span>${qi+1} / ${GQ.length}</span></div>
+  <div class="gbar" aria-hidden="true"><i style="width:${qi/GQ.length*100}%"></i></div>
+  <div class="stmt pop"><p class="q">${q.t}</p></div>
+  <div class="likert" role="group" aria-label="あてはまる度合い">${LK.map((l,i)=>`<button class="lk l${i}" data-v="${5-i}" aria-label="${l}"></button>`).join("")}</div>
+  <div class="lk-labels"><span style="color:#1f7a42">そう思う</span><span style="color:var(--cherry)">ちがう</span></div>
+  ${qi>0?`<button class="btn white small" id="gback" style="align-self:flex-start">ひとつ戻る</button>`:""}`;
+  app.querySelectorAll(".lk").forEach(b=>b.onclick=()=>{
+    app.querySelectorAll(".lk").forEach(x=>x.disabled=true);
+    b.classList.add("picked");
+    gans.push(+b.dataset.v);
+    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
+  });
+  const back=document.getElementById("gback");
+  if(back) back.onclick=()=>{gans.pop();gQuestion();};
+  window.scrollTo({top:0});
+}
+
+function question(){
+  const qi=picks.length, q=QS[qi];
+  app.innerHTML=`
+  <div class="progress" aria-label="${qi+1}問目 / ${QS.length}問">${QS.map((_,i)=>`<i class="${i<=qi?"on":""}"></i>`).join("")}</div>
+  <div class="qhead pop"><div class="qno">${qi+1}</div><p class="q">${q.q}</p></div>
+  <div class="opts">${q.o.map((o,i)=>`<button class="opt" data-i="${i}"><span class="badge b${i}">${"ABCD"[i]}</span>
+    <span>${o[0]}${o[1]?`<small>${o[1]}</small>`:""}</span></button>`).join("")}</div>
+  ${qi>0?`<button class="btn white small" id="back" style="align-self:flex-start">ひとつ戻る</button>`:""}`;
+  app.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{
+    app.querySelectorAll(".opt").forEach(x=>x.disabled=true);
+    b.classList.add("picked");
+    picks.push(+b.dataset.i);
+    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);result(r.key,r.pct,true);}},220);
+  });
+  const back=document.getElementById("back");
+  if(back) back.onclick=()=>{picks.pop();question();};
+  window.scrollTo({top:0});
+}
+
+function stars(k){
+  const p=SHARE_PCT[k]; if(p==null) return "";
+  const n=p<2.6?5:p<3.0?4:p<3.5?3:p<4.0?2:1;
+  return `<span class="stars" title="全回答パターンのうち${p}%がこのタイプ">レア度 <b>${"★".repeat(n)}${"☆".repeat(5-n)}</b></span>`;
+}
+
+function shareText(k,pct,an){
+  return `ピックルボール${an?"ガチ分析":""}で私は【${pn(k)}】でした。(全30タイプ No.${NO(k)})\n「${T[k][1]}」\n${AXES.map(a=>AX[a].jp+rankOf(pct[a])).join(" ")}\n#ピックルボール診断 #ピックルボール\n${typeUrl(k)}`;
+}
+
+function result(k,pct,mine,an){
+  const [a,b]=k.split("-"), t=T[k], en=enemyOf(k), mt=matchOf(k);
+  pct=pct||protoPct(k);
+  const total=Math.round(AXES.reduce((s,x)=>s+pct[x],0)/AXES.length);
+  const text=shareText(k,pct,an);
+  app.style.setProperty("--band1",AX[a].color);
+  app.innerHTML=`
+  <div class="meta"><span class="chip">TYPE No.${NO(k)} / 30</span>${an?`<span class="tag red">ガチ分析</span>`:""}${stars(k)}</div>
+  <div class="card pop">
+    <div class="card-top">
+      <div class="mark stamp">${mark(k)}</div>
+      <div><div class="card-name">${nm(k)}</div><div class="card-catch">${cp(t[1])}</div></div>
+    </div>
+    <div class="card-body">
+      <div>
+        <div class="section-label">PARAMETERS${mine?"":" ・ このタイプの目安"}</div>
+        <div class="params">${radar(pct)}
+          <div class="plist">${AXES.map(x=>`<div class="prow">${axisIcon(x)}<span>${AX[x].jp}</span><span class="rank ${rankOf(pct[x])}">${rankOf(pct[x])}</span><span class="val">${pct[x]}</span></div>`).join("")}
+            <div class="pow-total"><span>ピックル力</span><b>${total}</b></div></div>
+        </div>
+      </div>
+      <div><div class="section-label">HOME POSITION</div>${court(k)}</div>
+      <div class="lines">
+        <div class="line"><span class="tag red">あるある</span><p>${t[2]}</p></div>
+        <div class="line"><span class="tag sky">ペアへ</span><p>${PAIR[a]}</p></div>
+        <div class="line"><span class="tag green">上達のコツ</span><p>${TIP[b]}</p></div>
+      </div>
+      <div class="pair">
+        <a class="mini" href="#${mt}"><span class="tag green">相性◎</span>${mark(mt)}<span>${nm(mt)}</span></a>
+        <a class="mini" href="#${en}"><span class="tag red">ライバル</span>${mark(en)}<span>${nm(en)}</span></a>
+      </div>
+    </div>
+  </div>
+  ${an?reportHTML(pct,an):""}
+  <div class="box" style="display:flex;flex-direction:column;gap:12px">
+    <h2>ペアにも診断させよう</h2>
+    <div class="share" id="sharetext">${text}</div>
+    <div class="row">
+      <a class="btn blue" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
+      <button class="btn white" id="copy">文章をコピー(Instagram用)</button>
+      <a class="btn white small" target="_blank" rel="noopener" href="https://x.com/intent/post?text=${encodeURIComponent(text)}">Xに投稿</a>
+    </div>
+    <p id="copied" hidden>コピーしました。</p>
+    <a class="btn" target="_blank" rel="noopener" href="${IG_URL}">ピックルボールIQをフォロー(Instagram)</a>
+    <a class="btn white small" target="_blank" rel="noopener" href="${TH_URL}">Threadsでもフォロー</a>
+  </div>
+  <button class="btn" id="again">${mine?"もう一回やる":"自分も診断する"}</button>
+  ${an?"":`<button class="btn white" id="godeep">ガチ分析(30問)でくわしく見る</button>`}
+  <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
+  ${dex(k)}
+  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
+  document.getElementById("again").onclick=()=>{if(an){gans=[];gQuestion();}else{picks=[];question();}};
+  const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];gQuestion();};
+  document.getElementById("copy").onclick=()=>{
+    const done=()=>{document.getElementById("copied").hidden=false};
+    const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("sharetext"));
+      const s=getSelection();s.removeAllRanges();s.addRange(r);};
+    try{navigator.clipboard.writeText(text).then(done,sel);}catch(e){sel();}
+  };
+  app.querySelectorAll(".card .mini,.report .mini").forEach(x=>x.onclick=e=>{e.preventDefault();result(x.getAttribute("href").slice(1));});
+  bindDex();
+  window.scrollTo({top:0});
+}
+
+function bindDex(){
+  app.querySelectorAll(".dex a").forEach(x=>x.onclick=e=>{e.preventDefault();result(x.getAttribute("href").slice(1));});
+}
+
+// #pow-vib などで、そのタイプの紹介を直接開ける(タイプ紹介の投稿用)
+const h=window.__TYPE__||decodeURIComponent(location.hash.slice(1));
+T[h]?result(h):intro();
+</script>
+
+</body></html>
