@@ -43,11 +43,34 @@ function doPost(e) {
   cache.put(k, String(c + 1), 120);
   var lock = LockService.getScriptLock(); lock.waitLock(5000);
   try {
-    var id = PropertiesService.getScriptProperties().getProperty('SHEET_ID'); // コードに直書きしない
-    var sh = SpreadsheetApp.openById(id).getSheetByName(TAB);
+    var sh = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(TAB); // シートに紐づけたスクリプト用(ID不要)
     sh.appendRow([new Date()].concat(row));
   } finally { lock.releaseLock(); }
   return ContentService.createTextOutput('ok');
+}
+/** 最初に1回だけ実行する。タブと見出しと集計式を作る(既存のデータは消さない)。 */
+function setup() {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ev = ss.getSheetByName(TAB) || ss.getSheets()[0].setName(TAB);
+  if (ev.getRange('A1').getValue() === '') {
+    ev.getRange(1, 1, 1, 10).setValues([['時刻','event','版','src','page','mode','type','top','n','target']]);
+    ev.setFrozenRows(1);
+  }
+  var s = ss.getSheetByName('shindan_概要') || ss.insertSheet('shindan_概要');
+  var E = TAB + '!';
+  s.getRange('A1:B9').setValues([
+    ['開いた', '=COUNTIFS(' + E + 'B:B,"open")'],
+    ['始めた', '=COUNTIFS(' + E + 'B:B,"start")'],
+    ['完走', '=COUNTIFS(' + E + 'B:B,"complete")'],
+    ['完走率(完走/始めた)', '=IFERROR(B3/B2,"")'],
+    ['途中でやめた', '=COUNTIFS(' + E + 'B:B,"quit")'],
+    ['共有ボタン押下(投稿数ではない)', '=COUNTIFS(' + E + 'B:B,"share")'],
+    ['共有リンク経由で開いた', '=COUNTIFS(' + E + 'B:B,"open",' + E + 'D:D,"share")'],
+    ['判定日(公開+14日)', '2026-10-28'],
+    ['手で数えた #ピックルボール診断 の投稿数(自分・家族を除く)', '']
+  ]);
+  var t = ss.getSheetByName('shindan_タイプ別') || ss.insertSheet('shindan_タイプ別');
+  t.getRange('A1').setFormula('=QUERY(' + E + 'A:J,"select G,count(B) where B=\'complete\' group by G order by count(B) desc label G \'タイプ\', count(B) \'回数\'",1)');
 }
 // 列: A 時刻 / B event / C 版 / D src / E page / F mode / G type / H top軸 / I 何問目 / J target
 

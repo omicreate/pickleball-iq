@@ -28,9 +28,9 @@
 
 ## 受け口の用意(許可後の手順)
 
-1. 新しいスプレッドシート(または既存の「ピックルボールIQ_数値集計」に tab `shindan_events`)を作り、1行目に見出し:`時刻,event,版,src,page,mode,type,top,n,target`
-2. `Code.gs.proposal.js` を Apps Script に貼り、スクリプトプロパティ `SHEET_ID` を設定 → ウェブアプリとしてデプロイ(実行:自分/アクセス:全員)
-3. 出た `.../exec` を、ビルド時の環境変数 `PBIQ_METRICS_URL` に入れて再ビルド → push
+1. 新しいスプレッドシートを作り(作成済み)、拡張機能 → Apps Script を開く(シートに紐づく形)
+2. `Code.gs.proposal.js` を貼り、`setup` を1回実行(タブ・見出し・集計式ができる) → ウェブアプリとしてデプロイ(実行:自分/アクセス:全員)
+3. 出た `.../exec` を、GitHub の Actions 変数 `PBIQ_METRICS_URL` に入れて再実行
 4. 公開版で open/start/complete が1行ずつ入るのを確認
 
 未確認: GAS 無料枠の同時書き込み・日次上限(「未確認」)/ sendBeacon が `/exec` のリダイレクトを越えて届くか(実機で要確認)。
