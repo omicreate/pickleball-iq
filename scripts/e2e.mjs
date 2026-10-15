@@ -18,6 +18,7 @@ const base = `http://localhost:${srv.address().port}/`;
 const b = await chromium.launch(); const bad = [];
 for (const w of [360, 400]) {
   const p = await b.newPage({ viewport: { width: w, height: 800 } });
+  await p.addInitScript(() => { if (!location.hash.includes("notice-test")) localStorage.setItem("pbiq-privacy-seen", "1"); }); // 初回のお知らせは専用のテスト以外では閉じておく
   p.on("pageerror", e => bad.push(`${w}: ${e.message}`)); p.on("console", m => m.type() === "error" && bad.push(`${w}: ${m.text()}`));
   const noOverflow = async tag => assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${w}px はみ出し: ${tag}`);
   // さくっと診断
@@ -34,6 +35,27 @@ for (const w of [360, 400]) {
   for (const k of ["pow-sta", "vib-nrd", "trk-nrd"]) { await p.goto(base + `t/${k}/`); await p.waitForSelector(".card"); await noOverflow("t/" + k); }
   await p.goto(base + "#luv-vib"); await p.waitForSelector(".card");
   await p.close();
+}
+// 計測の約束: 説明の画面・「送らない」が残る・初回のお知らせは一度閉じたら出ない
+{
+  const p3 = await b.newPage({ viewport: { width: 360, height: 800 } }); const errs = [];
+  p3.on("pageerror", e => errs.push(e.message));
+  const noOverflow = async tag => assert.ok(await p3.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `はみ出し: ${tag}`);
+  await p3.goto(base + "#notice-test");
+  const notice = p3.locator('aside[aria-label="計測のお知らせ"]');
+  assert.equal(await notice.count(), 1); await noOverflow("notice");
+  await notice.locator('button[aria-label="お知らせを閉じる"]').click(); assert.equal(await notice.count(), 0);
+  await p3.goto(base + "#notice-test"); assert.equal(await notice.count(), 0, "閉じたら次から出ない");
+  await p3.goto(base); await p3.click("footer a[data-privacy]");
+  await p3.waitForSelector("h1:has-text('プライバシーと計測')"); await noOverflow("privacy");
+  assert.equal(await p3.getAttribute("#pvon", "aria-checked"), "true");
+  await p3.click("#pvoff"); assert.equal(await p3.getAttribute("#pvoff", "aria-checked"), "true");
+  await p3.goto(base + "#privacy"); assert.equal(await p3.getAttribute("#pvoff", "aria-checked"), "true", "送らない が残る");
+  assert.equal(await p3.evaluate(() => localStorage.getItem("pbiq-track-off")), "1");
+  await p3.click("#pvback"); await p3.waitForSelector("#start");
+  // タイプ紹介ページからも説明に行ける
+  await p3.goto(base + "t/pow-sta/"); await p3.click("footer a[data-privacy]"); await p3.waitForSelector("h1:has-text('プライバシーと計測')");
+  assert.deepEqual(errs, []); await p3.close();
 }
 const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => fails.push("req " + r.url()));
 const { L } = await import("./build.mjs");
