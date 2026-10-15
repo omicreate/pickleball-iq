@@ -35,6 +35,36 @@ for (const w of [360, 400]) {
   await p.goto(base + "#luv-vib"); await p.waitForSelector(".card");
   await p.close();
 }
+// 匿名の回数送信(受け口はダミーに差し替え。実際の Google には送らない)
+const MURL = "https://script.google.com/macros/s/TEST/exec";
+async function metricsPage(init) {
+  const ctx = await b.newContext({ viewport: { width: 390, height: 800 } }); const got = [];
+  await ctx.route(MURL, r => { try { got.push(JSON.parse(r.request().postData())); } catch (e) { got.push({ bad: true }); } r.fulfill({ status: 200, body: "ok" }); });
+  await ctx.route(/^https?:\/\/(?!localhost)/, r => r.request().url() === MURL ? r.fallback() : r.abort());
+  await ctx.addInitScript(u => { window.__METRICS_URL__ = u; }, MURL);
+  if (init) await ctx.addInitScript(init);
+  return { ctx, got, p: await ctx.newPage() };
+}
+{
+  const { ctx, got, p } = await metricsPage();
+  await p.goto(base + "?src=ig_bio&utm=x"); await p.click("#start");
+  for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
+  await p.waitForSelector(".card"); await p.click("#copy"); await p.waitForTimeout(300);
+  const ev = got.map(g => g.e); for (const e of ["open", "start", "complete", "share"]) assert.ok(ev.includes(e), "送信されない: " + e + " / " + ev);
+  assert.ok(got.every(g => g.src === "ig_bio"), "src が付かない"); assert.ok(!JSON.stringify(got).match(/utm|answers|picks/), "余計な情報");
+  const c = got.find(g => g.e === "complete"); assert.ok(c.mode === "quick" && /^[a-z]{3}-[a-z]{3}$/.test(c.type));
+  await ctx.close();
+}
+{ // 止める設定: ボタンで止めると、その後は何も送らない(再読込しても)
+  const { ctx, got, p } = await metricsPage();
+  await p.goto(base); await p.click(".privacy summary"); await p.click("#nometrics"); const n0 = got.length;
+  await p.goto(base); await p.click("#start"); await p.click(".opt >> nth=0"); await p.waitForTimeout(300);
+  assert.equal(got.length, n0, "止めたのに送信された"); await ctx.close();
+}
+{ // DoNotTrack
+  const { ctx, got, p } = await metricsPage(() => Object.defineProperty(navigator, "doNotTrack", { get: () => "1" }));
+  await p.goto(base); await p.click("#start"); await p.waitForTimeout(300); assert.equal(got.length, 0, "DNTなのに送信"); await ctx.close();
+}
 const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => fails.push("req " + r.url()));
 const { L } = await import("./build.mjs");
 for (const k of L.KEYS) { await p2.goto(base + `t/${k}/`); await p2.waitForSelector(".card .card-name"); const n = await p2.textContent(".card-name"); assert.equal(n.replace(/\s/g, ""), L.pn(k)); }

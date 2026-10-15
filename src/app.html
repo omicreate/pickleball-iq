@@ -112,6 +112,7 @@ p{margin:0}
 .dex span{font-weight:900;font-size:13px;line-height:1.35}
 .dex-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
 footer{font-size:12px;color:var(--sub);text-align:center}
+.privacy{font-size:13px;font-weight:700;text-align:left;margin-top:10px}.privacy summary{cursor:pointer;text-align:center}.privacy ul{margin:6px 0;padding-left:20px}.privacy .btn{margin-top:6px}
 .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
 .mode{appearance:none;cursor:pointer;text-align:left;color:var(--navy);font-family:var(--f-body);border:4px solid var(--navy);border-radius:22px;
   box-shadow:6px 6px 0 var(--navy);padding:16px;display:flex;flex-direction:column;gap:6px;transition:transform .08s,box-shadow .08s;min-width:0}
@@ -182,6 +183,39 @@ const SISTER_URL = "https://omicreate.github.io/pickle-asobi/?src=pb_iq_cross";
 const IG_URL = "https://www.instagram.com/pickleballiq_jp/";
 const TH_URL = "https://www.threads.net/@pickleballiq_jp";
 const typeUrl = k => SITE + "t/" + k + "/?src=share";
+
+// ===== 匿名の回数だけ送る(送る内容は下の PRIVACY_HTML のとおり。止める設定つき) =====
+// 受け口(Apps Script)の URL が決まったら METRICS_URL に入れる。空のあいだは何も送らない。
+const METRICS_URL = window.__METRICS_URL__ || "";
+const APP_V = "0.1.0";
+const OPT_KEY = "pbiq_no_metrics";
+const optedOut = () => { try { return localStorage.getItem(OPT_KEY) === "1"; } catch (e) { return false; } };
+const setOptOut = v => { try { v ? localStorage.setItem(OPT_KEY, "1") : localStorage.removeItem(OPT_KEY); } catch (e) {} };
+const srcOf = () => { try { const v = new URLSearchParams(location.search).get("src") || ""; return /^[a-z0-9_]{1,24}$/.test(v) ? v : ""; } catch (e) { return ""; } };
+function track(event, props) {
+  try {
+    if (!METRICS_URL || optedOut() || navigator.doNotTrack === "1" || navigator.globalPrivacyControl) return;
+    const body = JSON.stringify(Object.assign({ e: event, v: APP_V, src: srcOf() }, props || {}));
+    if (navigator.sendBeacon) navigator.sendBeacon(METRICS_URL, body);
+    else fetch(METRICS_URL, { method: "POST", mode: "no-cors", keepalive: true, headers: { "Content-Type": "text/plain" }, body });
+  } catch (e) {}
+}
+let progress = null; // 診断の途中: {mode, n}。やめたときの「どこまで進んだか」を1回だけ送る
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "hidden" && progress && progress.n > 0) { track("quit", { mode: progress.mode, n: progress.n }); progress = null; }
+});
+document.addEventListener("click", e => {
+  const a = e.target.closest && e.target.closest("[data-track]"); if (!a) return;
+  const [ev, arg] = a.dataset.track.split(":"); track(ev, { target: arg });
+});
+const PRIVACY_HTML = `<details class="privacy"><summary>送る内容と、止める設定</summary>
+  <p>使われ方を知るために、次の「回数」だけを送ります。名前・回答の中身・端末や場所がわかるものは送りません。</p>
+  <ul><li>開いた／始めた／最後まで答えた(さくっと・ガチ分析のどちらか、出たタイプ)</li><li>途中でやめた(何問目まで)</li><li>共有・フォローのボタンを押した(どれか)</li><li>どこから来たか(リンクの印)</li></ul>
+  <button class="btn white small" id="nometrics" type="button">${optedOut() ? "送るのを再開する" : "送らない"}</button></details>`;
+function bindPrivacy() {
+  const b = document.getElementById("nometrics"); if (!b) return;
+  b.onclick = () => { setOptOut(!optedOut()); b.textContent = optedOut() ? "送るのを再開する" : "送らない"; };
+}
 
 // ===== LOGIC START =====
 const AXES=["pow","sta","trk","luv","nrd","vib"];
@@ -485,17 +519,18 @@ function intro(){
   </div>
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(null)}
-  <a class="box" href="${SISTER_URL}" style="text-decoration:none;color:inherit;display:block"><span class="tag green">姉妹アプリ</span><h3 style="margin-top:8px">ピクルくんとあそぼ</h3><p style="font-size:14px;font-weight:700">親子・なかまで遊べるミニゲーム集。</p></a>
-  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
-  document.getElementById("start").onclick=()=>{picks=[];question();};
-  document.getElementById("gstart").onclick=()=>{gans=[];gQuestion();};
-  bindDex();
+  <a class="box" data-track="sister:asobi" href="${SISTER_URL}" style="text-decoration:none;color:inherit;display:block"><span class="tag green">姉妹アプリ</span><h3 style="margin-top:8px">ピクルくんとあそぼ</h3><p style="font-size:14px;font-weight:700">親子・なかまで遊べるミニゲーム集。</p></a>
+  <footer>作:omicreate ・ 結果はお遊びです${PRIVACY_HTML}</footer>`;
+  document.getElementById("start").onclick=()=>{picks=[];track("start",{mode:"quick"});question();};
+  document.getElementById("gstart").onclick=()=>{gans=[];track("start",{mode:"deep"});gQuestion();};
+  bindDex();bindPrivacy();
 }
 
 let gans=[];
 const LK=["そう思う","ややそう思う","どちらでもない","ややちがう","ちがう"];
 function gQuestion(){
   const qi=gans.length, q=GQ[qi];
+  progress={mode:"deep",n:qi};
   app.innerHTML=`
   <div class="gmeta"><span>ガチ分析</span><span>${qi+1} / ${GQ.length}</span></div>
   <div class="gbar" aria-hidden="true"><i style="width:${qi/GQ.length*100}%"></i></div>
@@ -507,7 +542,7 @@ function gQuestion(){
     app.querySelectorAll(".lk").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     gans.push(+b.dataset.v);
-    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
+    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);progress=null;track("complete",{mode:"deep",type:r.key,top:r.key.split("-")[0]});result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
   });
   const back=document.getElementById("gback");
   if(back) back.onclick=()=>{gans.pop();gQuestion();};
@@ -516,6 +551,7 @@ function gQuestion(){
 
 function question(){
   const qi=picks.length, q=QS[qi];
+  progress={mode:"quick",n:qi};
   app.innerHTML=`
   <div class="progress" aria-label="${qi+1}問目 / ${QS.length}問">${QS.map((_,i)=>`<i class="${i<=qi?"on":""}"></i>`).join("")}</div>
   <div class="qhead pop"><div class="qno">${qi+1}</div><p class="q">${q.q}</p></div>
@@ -526,7 +562,7 @@ function question(){
     app.querySelectorAll(".opt").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     picks.push(+b.dataset.i);
-    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);result(r.key,r.pct,true);}},220);
+    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);progress=null;track("complete",{mode:"quick",type:r.key,top:r.key.split("-")[0]});result(r.key,r.pct,true);}},220);
   });
   const back=document.getElementById("back");
   if(back) back.onclick=()=>{picks.pop();question();};
@@ -581,19 +617,19 @@ function result(k,pct,mine,an){
     <h2>ペアにも診断させよう</h2>
     <div class="share" id="sharetext">${text}</div>
     <div class="row">
-      <a class="btn blue" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
-      <button class="btn white" id="copy">文章をコピー(Instagram用)</button>
-      <a class="btn white small" target="_blank" rel="noopener" href="https://x.com/intent/post?text=${encodeURIComponent(text)}">Xに投稿</a>
+      <a class="btn blue" data-track="share:threads" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
+      <button class="btn white" id="copy" data-track="share:copy">文章をコピー(Instagram用)</button>
+      <a class="btn white small" data-track="share:x" target="_blank" rel="noopener" href="https://x.com/intent/post?text=${encodeURIComponent(text)}">Xに投稿</a>
     </div>
     <p id="copied" hidden>コピーしました。</p>
-    <a class="btn" target="_blank" rel="noopener" href="${IG_URL}">ピックルボールIQをフォロー(Instagram)</a>
-    <a class="btn white small" target="_blank" rel="noopener" href="${TH_URL}">Threadsでもフォロー</a>
+    <a class="btn" data-track="follow:ig" target="_blank" rel="noopener" href="${IG_URL}">ピックルボールIQをフォロー(Instagram)</a>
+    <a class="btn white small" data-track="follow:threads" target="_blank" rel="noopener" href="${TH_URL}">Threadsでもフォロー</a>
   </div>
   <button class="btn" id="again">${mine?"もう一回やる":"自分も診断する"}</button>
   ${an?"":`<button class="btn white" id="godeep">ガチ分析(30問)でくわしく見る</button>`}
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(k)}
-  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
+  <footer>作:omicreate ・ 結果はお遊びです${PRIVACY_HTML}</footer>`;
   document.getElementById("again").onclick=()=>{if(an){gans=[];gQuestion();}else{picks=[];question();}};
   const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];gQuestion();};
   document.getElementById("copy").onclick=()=>{
@@ -603,7 +639,7 @@ function result(k,pct,mine,an){
     try{navigator.clipboard.writeText(text).then(done,sel);}catch(e){sel();}
   };
   app.querySelectorAll(".card .mini,.report .mini").forEach(x=>x.onclick=e=>{e.preventDefault();result(x.getAttribute("href").slice(1));});
-  bindDex();
+  bindDex();bindPrivacy();
   window.scrollTo({top:0});
 }
 
@@ -613,6 +649,7 @@ function bindDex(){
 
 // #pow-vib などで、そのタイプの紹介を直接開ける(タイプ紹介の投稿用)
 const h=window.__TYPE__||decodeURIComponent(location.hash.slice(1));
+track("open",{page:T[h]?"type":"top",type:T[h]?h:undefined});
 T[h]?result(h):intro();
 </script>
 

@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: 22
       - run: node scripts/test.mjs        # 実ページ30・題名・書体同梱・全30タイプ。落ちたら公開しない
+        env:
+          PBIQ_METRICS_URL: ${{ vars.PBIQ_METRICS_URL }}   # 受け口の URL(Actions の変数)。未設定なら何も送らない版になる
+      - run: node scripts/test-metrics.mjs  # 受け口案の検証。アプリが送る内容が許可リスト内か
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

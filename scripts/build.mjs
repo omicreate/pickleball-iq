@@ -16,6 +16,8 @@ export const L = new Function(logic + "; return {T,KEYS,AXES,AX,pn,scoreOf,gScor
 const esc = s => s.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 const no = k => String(L.KEYS.indexOf(k) + 1).padStart(2, "0");
 
+// 受け口の URL は環境変数で渡す(https の Apps Script だけ許可)。空なら何も送らない版になる
+const METRICS = /^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(process.env.PBIQ_METRICS_URL || "") ? process.env.PBIQ_METRICS_URL : "";
 function meta({ url, title, desc, type }) {
   return `
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
@@ -27,7 +29,7 @@ function meta({ url, title, desc, type }) {
 <meta property="og:url" content="${url}"><meta property="og:image" content="${SITE}og.png">
 <meta property="og:image:width" content="1200"><meta property="og:image:height" content="630"><meta property="og:locale" content="ja_JP">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:image" content="${SITE}og.png">
-<meta name="theme-color" content="#f2efe8">${type ? `<script>window.__TYPE__=${JSON.stringify(type)}</script>` : ""}`;
+<meta name="theme-color" content="#f2efe8">${METRICS ? `<script>window.__METRICS_URL__=${JSON.stringify(METRICS)}</script>` : ""}${type ? `<script>window.__TYPE__=${JSON.stringify(type)}</script>` : ""}`;
 }
 
 function page({ root: r, ...m }) {
