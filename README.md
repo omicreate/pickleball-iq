@@ -20,6 +20,6 @@ npm run test:e2e  # 画面の通し
 `main` に push → テストが通れば GitHub Pages に公開(Settings > Pages の Source を「GitHub Actions」に)。
 
 ## 決まりごと
-- 外に送るのは匿名の回数だけ(今は計測なし。①の残りで追加)。ログイン・名前の登録なし。
+- 外に送るのは匿名の回数だけ: `open`(開いた・タイプ紹介ページはtype付き)/`start`(さくっと・ガチ)/`finish`(タイプ・さくっと・ガチ)・`?src=`・版。姉妹アプリと同じ Apps Script(正本 `dev\pbiq-metrics`)→スプレッドシート「pickleball_iq_数値集計」の `iq_events` / `iq_概要`。公開URL以外・DNT/GPC では送らない。ログイン・名前の登録なし。
 - 共有リンクは `/t/<タイプ>/?src=share`。`?src=` の印: Instagram `pb_ig_bio` / Threads `pb_th_bio` / 姉妹アプリから `pb_asobi_cross`(予定)。
 - リポジトリ名(URL)は変えない(Pages は転送されない)。

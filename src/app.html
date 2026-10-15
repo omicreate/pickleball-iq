@@ -183,6 +183,43 @@ const IG_URL = "https://www.instagram.com/pickleballiq_jp/";
 const TH_URL = "https://www.threads.net/@pickleballiq_jp";
 const typeUrl = k => SITE + "t/" + k + "/?src=share";
 
+// ---- 匿名の回数だけを数える(Apps Script→スプレッドシート。姉妹アプリと同じ受け口) ----
+// 送るのは「できごと(open/start/finish)・タイプ・さくっと/ガチ・リンクの印(?src=)・版」だけ。回答の中身・名前・端末IDは送らない。
+// 公開URL以外(手元・試遊)では送らない。ブラウザの「追跡しない」(DNT/GPC)がオンのときも送らない。
+const COUNTER_URL = "https://script.google.com/macros/s/AKfycbwZ7leA3EVJYlJR3Ia7GLGFxui8NBSy1Npc-fDVkXUHPiEc4b_LM1T-G9w6tr88zXA/exec";
+const APP_V = "1.0";
+const counter = (() => {
+  let src = "", opened = false;
+  const clean = v => v && /^[A-Za-z0-9_-]{1,40}$/.test(v) ? v : "";
+  try {
+    const u = new URL(location.href);
+    const fromUrl = clean(u.searchParams.get("src"));
+    if (u.searchParams.has("src")) { u.searchParams.delete("src"); history.replaceState(history.state, "", u.pathname + u.search + u.hash); }
+    if (fromUrl) sessionStorage.setItem("pbiq:src", fromUrl);
+    src = fromUrl || clean(sessionStorage.getItem("pbiq:src"));
+  } catch (e) { src = ""; }
+  const on = () => {
+    try {
+      if (location.hostname !== new URL(SITE).hostname) return false;
+      return !(navigator.doNotTrack === "1" || navigator.globalPrivacyControl === true);
+    } catch (e) { return false; }
+  };
+  const send = (ev, extra) => {
+    if (!on()) return;
+    try {
+      const q = new URLSearchParams(Object.assign({ app: "pickleball-iq", ev, v: APP_V }, src ? { src } : {}, extra || {}));
+      const url = COUNTER_URL + "?" + q;
+      if (navigator.sendBeacon && navigator.sendBeacon(url)) return;
+      fetch(url, { mode: "no-cors", credentials: "omit", cache: "no-store", keepalive: true, referrerPolicy: "no-referrer" }).catch(() => {});
+    } catch (e) { /* 送れなくても診断は続ける */ }
+  };
+  return {
+    open(type) { if (opened) return; opened = true; send("open", type ? { type } : {}); },
+    start(mode) { send("start", { mode }); },
+    finish(type, mode) { send("finish", { type, mode }); }
+  };
+})();
+
 // ===== LOGIC START =====
 const AXES=["pow","sta","trk","luv","nrd","vib"];
 const AX={
@@ -486,9 +523,9 @@ function intro(){
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(null)}
   <a class="box" href="${SISTER_URL}" style="text-decoration:none;color:inherit;display:block"><span class="tag green">姉妹アプリ</span><h3 style="margin-top:8px">ピクルくんとあそぼ</h3><p style="font-size:14px;font-weight:700">親子・なかまで遊べるミニゲーム集。</p></a>
-  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
-  document.getElementById("start").onclick=()=>{picks=[];question();};
-  document.getElementById("gstart").onclick=()=>{gans=[];gQuestion();};
+  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数とタイプの数だけを匿名で数えています(回答の中身は送りません)</footer>`;
+  document.getElementById("start").onclick=()=>{picks=[];counter.start("quick");question();};
+  document.getElementById("gstart").onclick=()=>{gans=[];counter.start("deep");gQuestion();};
   bindDex();
 }
 
@@ -507,7 +544,7 @@ function gQuestion(){
     app.querySelectorAll(".lk").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     gans.push(+b.dataset.v);
-    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
+    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);counter.finish(r.key,"deep");result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
   });
   const back=document.getElementById("gback");
   if(back) back.onclick=()=>{gans.pop();gQuestion();};
@@ -526,7 +563,7 @@ function question(){
     app.querySelectorAll(".opt").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     picks.push(+b.dataset.i);
-    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);result(r.key,r.pct,true);}},220);
+    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);counter.finish(r.key,"quick");result(r.key,r.pct,true);}},220);
   });
   const back=document.getElementById("back");
   if(back) back.onclick=()=>{picks.pop();question();};
@@ -593,9 +630,9 @@ function result(k,pct,mine,an){
   ${an?"":`<button class="btn white" id="godeep">ガチ分析(30問)でくわしく見る</button>`}
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(k)}
-  <footer>作:omicreate ・ 結果はお遊びです</footer>`;
-  document.getElementById("again").onclick=()=>{if(an){gans=[];gQuestion();}else{picks=[];question();}};
-  const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];gQuestion();};
+  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数とタイプの数だけを匿名で数えています(回答の中身は送りません)</footer>`;
+  document.getElementById("again").onclick=()=>{if(an){gans=[];counter.start("deep");gQuestion();}else{picks=[];counter.start("quick");question();}};
+  const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];counter.start("deep");gQuestion();};
   document.getElementById("copy").onclick=()=>{
     const done=()=>{document.getElementById("copied").hidden=false};
     const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("sharetext"));
@@ -613,6 +650,7 @@ function bindDex(){
 
 // #pow-vib などで、そのタイプの紹介を直接開ける(タイプ紹介の投稿用)
 const h=window.__TYPE__||decodeURIComponent(location.hash.slice(1));
+counter.open(T[h]?h:"");
 T[h]?result(h):intro();
 </script>
 
