@@ -24,6 +24,7 @@ for (const w of [360, 400]) {
   await p.goto(base); await noOverflow("top"); await p.click("#start");
   for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
   await p.waitForSelector(".card"); await noOverflow("result");
+  await p.waitForSelector("#cardimg:not([hidden])"); assert.deepEqual(await p.evaluate(() => [cardimg.naturalWidth, cardimg.naturalHeight]), [1080, 1350], "結果カード画像のサイズ"); assert.ok(await p.locator("#saveimg").count() === 1); assert.equal(await p.locator('a[href*="x.com/intent"]').count(), 0, "Xボタンが残っている");
   const share = await p.textContent("#sharetext"); assert.match(share, /#ピックルボール診断/); assert.match(share, /omicreate\.github\.io\/pickleball-iq\/t\/[a-z]{3}-[a-z]{3}\/\?src=share/);
   assert.ok(await p.locator('a[href*="threads.net/intent/post"]').count() === 1); assert.ok(await p.locator('a[href*="instagram.com/pickleballiq_jp"]').count() === 1);
   // ガチ分析
@@ -35,7 +36,7 @@ for (const w of [360, 400]) {
   await p.goto(base + "#luv-vib"); await p.waitForSelector(".card");
   await p.close();
 }
-const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => fails.push("req " + r.url()));
+const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => { if (!r.url().startsWith("blob:")) fails.push("req " + r.url()); }); // 結果カード画像のプレビュー(blob)は、ページ移動で中断されるのが正常
 const { L } = await import("./build.mjs");
 for (const k of L.KEYS) { await p2.goto(base + `t/${k}/`); await p2.waitForSelector(".card .card-name"); const n = await p2.textContent(".card-name"); assert.equal(n.replace(/\s/g, ""), L.pn(k)); }
 assert.deepEqual(fails, [], "30ページの読み込み失敗: " + fails.join(","));
