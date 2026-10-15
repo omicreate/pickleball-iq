@@ -1,5 +1,6 @@
 // src/app.html を元に dist/ を作る。依存なし(Node 20+)。
-//   dist/index.html            診断のトップ
+//   dist/index.html            入口(アプリ一覧)
+//   dist/shindan/index.html    診断のトップ
 //   dist/t/<タイプ>/index.html  タイプ別の実ページ(30枚。題名・説明つき)
 //   dist/fonts.css, fonts/, og.png, sitemap.xml, robots.txt
 import fs from "node:fs";
@@ -39,8 +40,9 @@ export function build(out = path.join(root, "dist")) {
   fs.mkdirSync(out, { recursive: true });
   const w = (p, c) => { fs.mkdirSync(path.dirname(path.join(out, p)), { recursive: true }); fs.writeFileSync(path.join(out, p), c); };
 
-  w("index.html", page({
-    root: "./", url: SITE,
+  w("index.html", fs.readFileSync(path.join(root, "src/home.html"), "utf8").replaceAll("%%SITE%%", SITE));
+  w("shindan/index.html", page({
+    root: "../", url: SITE + "shindan/",
     title: "ピックルボールタイプ診断｜あなたはコートのどこに住む？",
     desc: "10問・約1分。6つのパラメータと全30タイプで、あなたのピックルボールの性格がわかる。ペアにも診断させよう。"
   }));
@@ -57,7 +59,7 @@ export function build(out = path.join(root, "dist")) {
   fs.cpSync(path.join(root, "src/fonts"), path.join(out, "fonts"), { recursive: true });
   if (fs.existsSync(path.join(root, "src/og.png"))) fs.copyFileSync(path.join(root, "src/og.png"), path.join(out, "og.png"));
   w("robots.txt", `User-agent: *\nAllow: /\nSitemap: ${SITE}sitemap.xml\n`);
-  w("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[SITE, ...L.KEYS.map(k => `${SITE}t/${k}/`)].map(u => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`);
+  w("sitemap.xml", `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${[SITE, SITE + "shindan/", ...L.KEYS.map(k => `${SITE}t/${k}/`)].map(u => `  <url><loc>${u}</loc></url>`).join("\n")}\n</urlset>\n`);
   w(".nojekyll", "");
   return out;
 }

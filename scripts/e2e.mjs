@@ -21,19 +21,19 @@ for (const w of [360, 400]) {
   p.on("pageerror", e => bad.push(`${w}: ${e.message}`)); p.on("console", m => m.type() === "error" && bad.push(`${w}: ${m.text()}`));
   const noOverflow = async tag => assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${w}px はみ出し: ${tag}`);
   // さくっと診断
-  await p.goto(base); await noOverflow("top"); await p.click("#start");
+  await p.goto(base); await noOverflow("home"); await p.click("#shindan"); await p.waitForSelector("#start"); await noOverflow("top"); await p.click("#start");
   for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
   await p.waitForSelector(".card"); await noOverflow("result");
   await p.waitForSelector("#cardimg:not([hidden])"); assert.deepEqual(await p.evaluate(() => [cardimg.naturalWidth, cardimg.naturalHeight]), [1080, 1350], "結果カード画像のサイズ"); assert.ok(await p.locator("#saveimg").count() === 1); assert.equal(await p.locator('a[href*="x.com/intent"]').count(), 0, "Xボタンが残っている");
   const share = await p.textContent("#sharetext"); assert.match(share, /#ピックルボール診断/); assert.match(share, /omicreate\.github\.io\/pickleball-iq\/t\/[a-z]{3}-[a-z]{3}\/\?src=share/);
   assert.ok(await p.locator('a[href*="threads.net/intent/post"]').count() === 1); assert.ok(await p.locator('a[href*="instagram.com/pickleballiq_jp"]').count() === 1);
   // ガチ分析
-  await p.goto(base); await p.click("#gstart");
+  await p.goto(base + "shindan/"); await p.click("#gstart");
   for (let i = 0; i < 30; i++) { await p.click(".lk.l" + (i % 5)); await p.waitForTimeout(210); }
   await p.waitForSelector(".report"); await noOverflow("report");
   // タイプ別の実ページ(30枚すべて)
   for (const k of ["pow-sta", "vib-nrd", "trk-nrd"]) { await p.goto(base + `t/${k}/`); await p.waitForSelector(".card"); await noOverflow("t/" + k); }
-  await p.goto(base + "#luv-vib"); await p.waitForSelector(".card");
+  await p.goto(base + "shindan/#luv-vib"); await p.waitForSelector(".card");
   await p.close();
 }
 const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => { if (!r.url().startsWith("blob:")) fails.push("req " + r.url()); }); // 結果カード画像のプレビュー(blob)は、ページ移動で中断されるのが正常
