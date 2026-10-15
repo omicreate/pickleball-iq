@@ -21,7 +21,7 @@ for (const w of [360, 400]) {
   p.on("pageerror", e => bad.push(`${w}: ${e.message}`)); p.on("console", m => m.type() === "error" && bad.push(`${w}: ${m.text()}`));
   const noOverflow = async tag => assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${w}px はみ出し: ${tag}`);
   // さくっと診断
-  await p.goto(base); await noOverflow("home"); await p.click("#shindan"); await p.waitForSelector("#start"); await noOverflow("top"); await p.click("#start");
+  await p.goto(base); await noOverflow("home"); assert.equal(await p.locator(".tool-card").count(), 2); await p.click("#shindan"); await p.waitForSelector("#start"); await noOverflow("top"); await p.click("#start");
   for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
   await p.waitForSelector(".card"); await noOverflow("result");
   await p.waitForSelector("#cardimg:not([hidden])"); assert.deepEqual(await p.evaluate(() => [cardimg.naturalWidth, cardimg.naturalHeight]), [1080, 1350], "結果カード画像のサイズ"); assert.ok(await p.locator("#saveimg").count() === 1); assert.equal(await p.locator('a[href*="x.com/intent"]').count(), 0, "Xボタンが残っている");

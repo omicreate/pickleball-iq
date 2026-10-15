@@ -22,7 +22,7 @@ for (const k of L.KEYS) {
 }
 assert.equal(titles.size, 30, "題名は30種すべて別");
 assert.ok(read("index.html").includes('href="./fonts.css"'));
-assert.ok(read("index.html").includes('href="shindan/"') && !read("index.html").includes("%%"), "入口から診断へ");
+assert.ok(read("index.html").includes('path:"shindan/"') && !read("index.html").includes("%%"), "入口から診断へ");
 assert.ok(read("shindan/index.html").includes('href="../fonts.css"') && !read("shindan/index.html").includes("%%"));
 assert.ok(fs.existsSync(path.join(out, "og.png")) && fs.statSync(path.join(out, "og.png")).size > 10000);
 assert.equal((read("sitemap.xml").match(/<loc>/g) || []).length, 32);

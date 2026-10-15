@@ -1,31 +1,90 @@
 <!doctype html><html lang="ja"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
-<title>ピックルボールIQ｜ピックルボールで遊ぶ・知るアプリ</title>
-<meta name="description" content="ピックルボールをもっと楽しむための小さなアプリ集。まずは10問・約1分のタイプ診断から。">
+<title>ピックルボールIQ｜ピックルボールをもっと楽しむアプリ</title>
+<meta name="description" content="ピックルボールをもっと楽しむための道具をまとめたアプリ。まずは10問・約1分のタイプ診断から。無料・登録なし。">
 <link rel="canonical" href="%%SITE%%">
 <meta property="og:type" content="website"><meta property="og:site_name" content="ピックルボールIQ">
-<meta property="og:title" content="ピックルボールIQ"><meta property="og:description" content="ピックルボールをもっと楽しむための小さなアプリ集。まずは10問・約1分のタイプ診断から。">
+<meta property="og:title" content="ピックルボールIQ"><meta property="og:description" content="ピックルボールをもっと楽しむための道具をまとめたアプリ。まずは10問・約1分のタイプ診断から。">
 <meta property="og:url" content="%%SITE%%"><meta property="og:image" content="%%SITE%%og.png"><meta name="twitter:card" content="summary_large_image">
 <meta name="theme-color" content="#f2efe8">
 <link rel="stylesheet" href="./fonts.css">
 <style>
-:root{--cloud:#f2efe8;--navy:#1b1b3a;--dot:#ffc9de;--cherry:#e8433a;--white:#fff;--sub:#5a5a75;--f-head:"Dela Gothic One","Hiragino Sans",sans-serif;--f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;color-scheme:light}
+/* 入口(ホーム)。つくりはソフトテニスIQのホームに倣う: 見出し → 道具のカード(左に現物の小さな図) → 姉妹アプリ → 応援 → 足もと。
+   色と書体は診断と同じ「アメリカンポップ」。 */
+:root{--cloud:#f2efe8;--navy:#1b1b3a;--dot:#ffc9de;--pool:#2f6fe4;--sky:#bfe3ff;--flamingo:#ff7eb6;--cherry:#e8433a;--sunny:#ffd23f;--pickle:#3dbe6b;--white:#fff;--sub:#5a5a75;
+  --f-head:"Dela Gothic One","Hiragino Sans",sans-serif;--f-body:"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif;--f-num:"Bowlby One","Arial Black",sans-serif;color-scheme:light}
 *{box-sizing:border-box}
 body{margin:0;min-height:100vh;color:var(--navy);font-family:var(--f-body);font-weight:700;line-height:1.6;background-color:var(--cloud);background-image:radial-gradient(var(--dot) 4px,transparent 4.5px);background-size:32px 32px;padding:0 max(16px,env(safe-area-inset-left,0px))}
-.wrap{max-width:540px;margin:0 auto;padding-block:36px 40px;display:flex;flex-direction:column;gap:22px}
-h1{font-family:var(--f-head);font-weight:400;margin:0;font-size:clamp(30px,9vw,44px);line-height:1.3}
-p{margin:0}.sub{color:var(--sub);font-size:15px}
-.app{display:block;text-decoration:none;color:inherit;background:var(--white);border:4px solid var(--navy);border-radius:20px;box-shadow:6px 6px 0 var(--navy);padding:18px}
-.app:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--navy)}
-.tag{display:inline-block;font-weight:900;font-size:14px;padding:3px 12px;border:3px solid var(--navy);border-radius:10px;background:var(--cherry);color:#fff}
-.app b{display:block;font-size:22px;font-weight:900;margin-top:8px}
-footer{font-size:13px;color:var(--sub)}
+.wrap{max-width:540px;margin:0 auto;padding-block:16px 32px;display:flex;flex-direction:column;gap:24px;min-height:100vh}
+h1,h2,h3,p{margin:0}
+a{color:inherit}
+.appbar{display:flex;align-items:center;gap:8px;font-weight:900;font-size:16px}
+.brandmark{width:22px;height:22px;border-radius:50%;background:var(--sunny);border:3px solid var(--navy);box-shadow:2px 2px 0 var(--navy)}
+.hero{display:grid;gap:8px;padding-top:8px}
+.eyebrow{font-family:var(--f-num);font-size:13px;letter-spacing:.08em;color:var(--pool)}
+.hero h1{font-family:var(--f-head);font-weight:400;font-size:clamp(28px,8.4vw,40px);line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.tool-list{list-style:none;margin:0;padding:0;display:grid;gap:14px}
+.tool-card{display:grid;grid-template-columns:120px minmax(0,1fr) auto;gap:16px;align-items:center;background:var(--white);border:4px solid var(--navy);border-radius:20px;box-shadow:6px 6px 0 var(--navy);padding:14px 16px;text-decoration:none}
+.tool-card:active{transform:translate(3px,3px);box-shadow:3px 3px 0 var(--navy)}
+.tool-text{display:grid;gap:2px}
+.tool-text h2,.tool-text h3{font-size:20px;font-weight:900;word-break:keep-all;overflow-wrap:anywhere}
+.tool-text p{font-size:14px;color:var(--sub);line-height:1.6}
+.tool-note{font-size:12px;color:var(--sub);margin-top:4px}
+.chev{width:22px;height:22px;fill:none;stroke:var(--navy);stroke-width:3;stroke-linecap:round;stroke-linejoin:round}
+.tv{width:120px;height:64px;border-radius:10px;background:var(--cloud);border:3px solid var(--navy);display:grid;place-items:center;overflow:hidden}
+.tv svg{width:100%;height:100%}
+.tv-asobi{background:var(--sky);font-family:var(--f-num);font-size:26px}
+.sister{display:grid;gap:8px}
+.support{display:grid;gap:10px;background:var(--white);border:4px solid var(--navy);border-radius:20px;padding:16px}
+.support h2{font-size:16px;font-weight:900}
+.support p{font-size:14px;color:var(--sub)}
+.btn{display:block;width:100%;min-height:48px;font:inherit;font-weight:900;font-size:16px;color:var(--navy);background:var(--sunny);border:3px solid var(--navy);border-radius:14px;box-shadow:4px 4px 0 var(--navy);cursor:pointer}
+.btn:active{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--navy)}
+.support-msg{font-size:13px;word-break:break-all}
+.foot{margin-top:auto;display:grid;gap:6px;font-size:12px;color:var(--sub);line-height:1.7}
+@media (max-width:420px){.tool-card{grid-template-columns:84px minmax(0,1fr) auto;gap:12px;padding:12px}.tv{width:84px;height:56px}.tv-asobi{font-size:20px}}
 </style></head><body><div class="wrap">
-<h1>ピックルボールIQ</h1>
-<p class="sub">ピックルボールをもっと楽しむための、小さなアプリ集です。</p>
-<a class="app" id="shindan" href="shindan/"><span class="tag">10問・約1分</span><b>ピックルボールタイプ診断</b><p>あなたはコートのどこに住む？ 全30タイプでわかる。</p></a>
-<footer>作:omicreate</footer>
+<header class="appbar"><span class="brandmark" aria-hidden="true"></span>ピックルボールIQ</header>
+<section class="hero"><p class="eyebrow">PICKLEBALL IQ</p><h1>ピックルボールを、<br>もっとおもしろく。</h1></section>
+<ul class="tool-list" id="tools"></ul>
+<section class="sister" aria-labelledby="sister-title">
+  <h2 id="sister-title" class="eyebrow">姉妹アプリ</h2>
+  <a class="tool-card" href="https://omicreate.github.io/pickle-asobi/?src=pb_iq_cross" target="_blank" rel="noopener">
+    <div class="tv tv-asobi" aria-hidden="true">PLAY</div>
+    <div class="tool-text"><h3>ピクルくんとあそぼ</h3><p>親子・なかまで、スマホ1台で遊べるミニゲーム集。</p><span class="tool-note">別のアプリが開きます</span></div>
+    <svg class="chev" viewBox="0 0 24 24" aria-label="別のアプリで開く"><path d="M7 17 17 7M8 7h9v9"/></svg>
+  </a>
+</section>
+<section class="support" aria-labelledby="support-title">
+  <h2 id="support-title">ピックルボールIQを応援する</h2>
+  <p>無料で作り続けています。おもしろかったら、ペアや仲間に教えてもらえるのがいちばんの応援です。</p>
+  <button type="button" class="btn" id="share">仲間に教える</button>
+  <p class="support-msg" id="share-msg" role="status" hidden></p>
+</section>
+<footer class="foot">
+  <p>ピックルボールの短い動画は <a href="https://www.instagram.com/pickleballiq_jp/" target="_blank" rel="noopener">Instagram</a>・<a href="https://www.threads.net/@pickleballiq_jp" target="_blank" rel="noopener">Threads</a> の @pickleballiq_jp で配信しています。</p>
+  <p>ログインや名前の登録はありません。</p>
+  <p>© omicreate</p>
+</footer>
 </div>
 <script>
-// 診断への入口。古いリンク(#タイプ)と ?src= の印は診断側へ引き継ぐ。
-(function(){var a=document.getElementById("shindan"),to="shindan/"+location.search+location.hash;a.href=to;if(location.hash.length>1)location.replace(to)})();
+// 道具の一覧。増えたらここに1件足すだけ(ソフトテニスIQの tools.ts と同じ考え方)。
+var TOOLS=[
+  {id:"shindan",path:"shindan/",name:"タイプ診断",lead:"10問・約1分。あなたのプレーを全30タイプで判定",
+   visual:'<svg viewBox="0 0 120 64"><polygon points="60,8 88,22 88,46 60,58 32,46 32,22" fill="var(--sky)" stroke="var(--navy)" stroke-width="2"/><polygon points="60,16 80,26 76,44 60,46 42,40 40,26" fill="var(--flamingo)" stroke="var(--navy)" stroke-width="2"/><circle cx="60" cy="32" r="3" fill="var(--navy)"/></svg>'}
+];
+(function(){
+  var q=location.search, list=document.getElementById("tools");
+  // 古いリンク(/#タイプ)は診断へ。?src= の印は道具側へ引き継ぐ(集計は道具側で数える)
+  if(location.hash.length>1){location.replace("shindan/"+q+location.hash);return}
+  list.innerHTML=TOOLS.map(function(t){return '<li><a class="tool-card" id="'+t.id+'" href="'+t.path+q+'"><div class="tv" aria-hidden="true">'+t.visual+'</div><div class="tool-text"><h2>'+t.name+'</h2><p>'+t.lead+'</p></div><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>'}).join("");
+  var msg=document.getElementById("share-msg");
+  document.getElementById("share").onclick=async function(){
+    var url=location.origin+location.pathname+"?src=share";
+    try{
+      if(navigator.share){await navigator.share({title:"ピックルボールIQ",text:"ピックルボールをもっと楽しむ無料アプリ",url:url});return}
+      await navigator.clipboard.writeText(url);msg.textContent="リンクをコピーしました";
+    }catch(e){if(e&&e.name==="AbortError")return;msg.textContent=url}
+    msg.hidden=false;
+  };
+})();
 </script></body></html>
