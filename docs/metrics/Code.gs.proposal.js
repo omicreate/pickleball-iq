@@ -12,7 +12,7 @@ var KEYS = ['pow-sta','pow-trk','pow-luv','pow-nrd','pow-vib','sta-pow','sta-trk
   'nrd-pow','nrd-sta','nrd-trk','nrd-luv','nrd-vib','vib-pow','vib-sta','vib-trk','vib-luv','vib-nrd'];
 var AXES = ['pow','sta','trk','luv','nrd','vib'];
 var EVENTS = ['open','start','complete','quit','share','follow','sister'];
-var TARGETS = { share: ['threads','copy','x'], follow: ['ig','threads'], sister: ['asobi'] };
+var TARGETS = { share: ['threads','copy'], follow: ['ig','threads'], sister: ['asobi'] };
 
 /** 純粋関数: 生の本文 → 行(配列) か null。単体テストはこれを呼ぶ。 */
 function validate_(raw) {
