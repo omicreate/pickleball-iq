@@ -40,6 +40,8 @@ assert.equal(Object.keys(g).length, 30);
 // 5. 共有文のリンクはタイプ別の実ページ
 const app = fs.readFileSync(path.join(import.meta.dirname, "../src/app.html"), "utf8");
 assert.ok(app.includes('typeUrl = k => SITE + "t/" + k + "/?src=share"'));
+// 6'. 診断が終わったときに、出たタイプ(結果)は送らない
+assert.ok(app.includes('finish(mode) { send("finish", { mode }); }') && !app.includes("counter.finish(r.key"), "finish は出たタイプを送らない");
 // 6. 計測の約束: 他社の解析・広告は入れない。送り先は自分の Apps Script だけ。説明の画面・「送らない」・初回のお知らせがある
 for (const f of ["index.html", `t/${L.KEYS[0]}/index.html`]) {
   const h = read(f);

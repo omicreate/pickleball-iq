@@ -201,11 +201,11 @@ const TH_URL = "https://www.threads.net/@pickleballiq_jp";
 const typeUrl = k => SITE + "t/" + k + "/?src=share";
 
 // ---- 匿名の回数だけを数える(Apps Script→スプレッドシート。姉妹アプリと同じ受け口) ----
-// 送るのは「できごと(open/start/finish)・タイプ・さくっと/ガチ・リンクの印(?src=)・版」だけ。回答の中身・名前・端末IDは送らない。
+// 送るのは「できごと(open/start/finish)・さくっと/ガチ・タイプ紹介ページを開いたときのタイプ・リンクの印(?src=)・版」だけ。回答の中身・出たタイプ・名前・端末IDは送らない。
 // 公開URL以外(手元・試遊)では送らない。ブラウザの「追跡しない」(DNT/GPC)がオンのとき、「プライバシーと計測」で「送らない」を選んだ端末からも送らない。
 // 他社の解析ツール・広告タグは使わない。計測の項目を足すときは、先に「プライバシーと計測」の説明を直す。
 const COUNTER_URL = "https://script.google.com/macros/s/AKfycbwZ7leA3EVJYlJR3Ia7GLGFxui8NBSy1Npc-fDVkXUHPiEc4b_LM1T-G9w6tr88zXA/exec";
-const APP_V = "1.0";
+const APP_V = "1.1";
 const ROOT = "%%ROOT%%";
 const OFF_KEY = "pbiq-track-off", SEEN_KEY = "pbiq-privacy-seen";
 const store = {
@@ -242,7 +242,7 @@ const counter = (() => {
   return {
     open(type) { if (opened) return; opened = true; send("open", type ? { type } : {}); },
     start(mode) { send("start", { mode }); },
-    finish(type, mode) { send("finish", { type, mode }); }
+    finish(mode) { send("finish", { mode }); }
   };
 })();
 
@@ -570,7 +570,7 @@ function gQuestion(){
     app.querySelectorAll(".lk").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     gans.push(+b.dataset.v);
-    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);counter.finish(r.key,"deep");result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
+    setTimeout(()=>{if(gans.length<GQ.length)gQuestion();else{const r=gScoreOf(gans);counter.finish("deep");result(r.key,r.pct,true,analysis(r.pct,r.order));}},180);
   });
   const back=document.getElementById("gback");
   if(back) back.onclick=()=>{gans.pop();gQuestion();};
@@ -589,7 +589,7 @@ function question(){
     app.querySelectorAll(".opt").forEach(x=>x.disabled=true);
     b.classList.add("picked");
     picks.push(+b.dataset.i);
-    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);counter.finish(r.key,"quick");result(r.key,r.pct,true);}},220);
+    setTimeout(()=>{if(picks.length<QS.length)question();else{const r=scoreOf(picks);counter.finish("quick");result(r.key,r.pct,true);}},220);
   });
   const back=document.getElementById("back");
   if(back) back.onclick=()=>{picks.pop();question();};
@@ -697,7 +697,7 @@ function privacy(){
       <li>Instagram などのリンクから開いたときの、リンクの印(例:Instagram のプロフィール)</li>
       <li>アプリを開いた回数(タイプ紹介のページは、どのタイプか)</li>
       <li>診断を始めた回数(さくっと・ガチのどちらか)</li>
-      <li>診断を最後まで終えた回数(出たタイプと、さくっと・ガチのどちらか)</li>
+      <li>診断を最後まで終えた回数(さくっと・ガチのどちらか。出たタイプは送りません)</li>
       <li>アプリの版(数字だけ)</li>
     </ul>
     <h2>数えないこと</h2>
