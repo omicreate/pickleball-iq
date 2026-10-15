@@ -49,7 +49,8 @@ async function metricsPage(init) {
   const { ctx, got, p } = await metricsPage();
   await p.goto(base + "?src=ig_bio&utm=x"); await p.click("#start");
   for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
-  await p.waitForSelector(".card"); await p.click("#copy"); await p.waitForTimeout(300);
+  await p.waitForSelector(".card"); await p.waitForSelector("#cardimg:not([hidden])"); assert.deepEqual(await p.evaluate(() => [cardimg.naturalWidth, cardimg.naturalHeight]), [1080, 1350], "結果カード画像のサイズ"); await p.click("#saveimg"); await p.click("#copy"); await p.waitForTimeout(400);
+  assert.ok(got.some(g => g.e === "share" && g.target === "image"), "画像ボタンの押下が数えられない");
   const ev = got.map(g => g.e); for (const e of ["open", "start", "complete", "share"]) assert.ok(ev.includes(e), "送信されない: " + e + " / " + ev);
   assert.ok(got.every(g => g.src === "ig_bio"), "src が付かない"); assert.ok(!JSON.stringify(got).match(/utm|answers|picks/), "余計な情報");
   const c = got.find(g => g.e === "complete"); assert.ok(c.mode === "quick" && /^[a-z]{3}-[a-z]{3}$/.test(c.type));

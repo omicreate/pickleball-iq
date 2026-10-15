@@ -111,6 +111,7 @@ p{margin:0}
 .dex em{font-style:normal;font-family:var(--f-num);font-size:11px;color:var(--sub)}
 .dex span{font-weight:900;font-size:13px;line-height:1.35}
 .dex-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}
+.cardimg img{display:block;width:100%;max-width:420px;margin:0 auto;border:4px solid var(--navy);border-radius:16px;background:var(--cloud)}.note{margin:0;font-size:12px;color:var(--sub);text-align:center}
 footer{font-size:12px;color:var(--sub);text-align:center}
 .privacy{font-size:13px;font-weight:700;text-align:left;margin-top:10px}.privacy summary{cursor:pointer;text-align:center}.privacy ul{margin:6px 0;padding-left:20px}.privacy .btn{margin-top:6px}
 .modes{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
@@ -569,6 +570,53 @@ function question(){
   window.scrollTo({top:0});
 }
 
+// ===== 結果カードを画像にする(1080x1350・Instagram/Threads向け。端末の中だけで作り、送信しない) =====
+const CV={cloud:"#f2efe8",navy:"#1b1b3a",pool:"#2f6fe4",sky:"#bfe3ff",flamingo:"#ff7eb6",cherry:"#e8433a",sunny:"#ffd23f",pickle:"#3dbe6b",white:"#ffffff",sub:"#5a5a75"};
+const solid=v=>v.replace(/var\(--(\w+)\)/g,(_,n)=>CV[n]||"#000");
+const loadImg=src=>new Promise((ok,ng)=>{const i=new Image();i.onload=()=>ok(i);i.onerror=ng;i.src=src;});
+async function cardPng(k,pct){
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  const [a]=k.split("-"), t=T[k], lines=t[0].split("|"), catchL=t[1].split(/(?<=、)/);
+  const total=Math.round(AXES.reduce((s,x)=>s+pct[x],0)/AXES.length);
+  const all=lines.join("")+t[1]+AXES.map(x=>AX[x].jp).join("")+"ピックル力レア度★☆ピックルボールIQ#診断";
+  try{await Promise.all([document.fonts.load('900 80px "Zen Maru Gothic"',all),document.fonts.load('400 40px "Bowlby One"',"TYPE No.0123456789/ SABCD")]);}catch(e){}
+  const body='"Zen Maru Gothic","Hiragino Maru Gothic ProN",sans-serif', num='"Bowlby One","Arial Black",sans-serif';
+  g.fillStyle=CV.cloud;g.fillRect(0,0,W,H);
+  g.fillStyle=solid(AX[a].color);g.fillRect(0,0,W,400);g.fillStyle=CV.navy;g.fillRect(0,400,W,8);
+  g.textBaseline="alphabetic";g.textAlign="left";
+  const chip="TYPE No."+NO(k)+" / 30";g.font='400 34px '+num;const cw=g.measureText(chip).width+56;
+  g.fillStyle=CV.navy;g.beginPath();g.roundRect(56,52,cw,58,29);g.fill();g.fillStyle="#fff";g.fillText(chip,84,95);
+  let fs=Math.min(92,Math.floor(250/(lines.length*1.1)));g.font='900 '+fs+'px '+body;
+  while(fs>52&&Math.max(...lines.map(l=>g.measureText(l).width))>640){fs-=4;g.font='900 '+fs+'px '+body;}
+  g.fillStyle=CV.navy;lines.forEach((l,i)=>g.fillText(l,56,150+fs*0.9+i*fs*1.1));
+  const mk=await loadImg("data:image/svg+xml;charset=utf-8,"+encodeURIComponent(solid(mark(k)).replace("<svg ",'<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" ')));
+  g.drawImage(mk,740,50,290,290);
+  g.textAlign="center";g.fillStyle=CV.navy;g.font='900 46px '+body;
+  catchL.forEach((l,i)=>g.fillText(l,W/2,492+i*62));
+  // レーダー
+  const cx=W/2,cy=915,R=222,pt=(i,r)=>{const th=-Math.PI/2+i*Math.PI/3;return [cx+r*Math.cos(th),cy+r*Math.sin(th)];};
+  const poly=(f,fill,stroke,lw,dash)=>{g.beginPath();AXES.forEach((_,i)=>{const [x,y]=pt(i,R*f);i?g.lineTo(x,y):g.moveTo(x,y);});g.closePath();if(fill){g.fillStyle=fill;g.fill();}g.setLineDash(dash||[]);g.lineWidth=lw;g.strokeStyle=stroke;g.lineJoin="round";g.stroke();g.setLineDash([]);};
+  poly(1,CV.white,CV.navy,6);poly(.66,null,CV.navy,3,[10,10]);poly(.33,null,CV.navy,3,[10,10]);
+  g.lineWidth=3;g.strokeStyle=CV.navy;AXES.forEach((_,i)=>{const [x,y]=pt(i,R);g.beginPath();g.moveTo(cx,cy);g.lineTo(x,y);g.stroke();});
+  g.beginPath();AXES.forEach((x,i)=>{const [px,py]=pt(i,R*Math.max(.06,pct[x]/100));i?g.lineTo(px,py):g.moveTo(px,py);});g.closePath();
+  g.globalAlpha=.85;g.fillStyle=CV.flamingo;g.fill();g.globalAlpha=1;g.lineWidth=7;g.strokeStyle=CV.navy;g.lineJoin="round";g.stroke();
+  AXES.forEach((x,i)=>{const [px,py]=pt(i,R*Math.max(.06,pct[x]/100));g.beginPath();g.arc(px,py,13,0,7);g.fillStyle=solid(AX[x].color);g.fill();g.lineWidth=5;g.stroke();});
+  g.fillStyle=CV.navy;g.font='900 40px '+body;
+  AXES.forEach((x,i)=>{const [lx,ly]=pt(i,R+72);g.fillText(AX[x].jp+" "+rankOf(pct[x]),lx,ly+14);});
+  // ピックル力・レア度
+  g.textAlign="left";g.font='900 34px '+body;g.fillStyle=CV.sub;g.fillText("ピックル力",56,1158);
+  g.font='400 96px '+num;g.fillStyle=CV.navy;g.fillText(String(total),56,1246);
+  const p=SHARE_PCT[k];if(p!=null){const n=p<2.6?5:p<3.0?4:p<3.5?3:p<4.0?2:1;g.textAlign="right";g.font='900 34px '+body;g.fillStyle=CV.sub;g.fillText("レア度",W-56,1168);g.font='900 52px '+body;g.fillStyle=CV.navy;g.fillText("★".repeat(n)+"☆".repeat(5-n),W-56,1236);}
+  g.fillStyle=CV.navy;g.fillRect(0,1262,W,88);g.fillStyle="#fff";g.textAlign="center";g.font='900 34px '+body;
+  g.fillText("ピックルボールIQ　#ピックルボール診断",W/2,1316);
+  return new Promise((ok,ng)=>c.toBlob(b=>b?ok(b):ng(new Error("png")),"image/png"));
+}
+async function sendCard(blob,k,text){
+  const file=new File([blob],"pickleball-iq-"+k+".png",{type:"image/png"});
+  if(navigator.canShare&&navigator.canShare({files:[file]})){try{await navigator.share({files:[file],text});return;}catch(e){if(e&&e.name==="AbortError")return;}}
+  const u=URL.createObjectURL(blob),el=document.createElement("a");el.href=u;el.download=file.name;document.body.appendChild(el);el.click();el.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
+}
+
 function stars(k){
   const p=SHARE_PCT[k]; if(p==null) return "";
   const n=p<2.6?5:p<3.0?4:p<3.5?3:p<4.0?2:1;
@@ -615,6 +663,9 @@ function result(k,pct,mine,an){
   ${an?reportHTML(pct,an):""}
   <div class="box" style="display:flex;flex-direction:column;gap:12px">
     <h2>ペアにも診断させよう</h2>
+    <div class="cardimg" id="cardbox"><img id="cardimg" alt="${pn(k)}の結果カード" hidden></div>
+    <button class="btn blue" id="saveimg" data-track="share:image" type="button">画像でシェア・保存</button>
+    <p class="note">画像は端末の中で作られ、送信されません。プレビューの長押しでも保存できます。</p>
     <div class="share" id="sharetext">${text}</div>
     <div class="row">
       <a class="btn blue" data-track="share:threads" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
@@ -631,6 +682,9 @@ function result(k,pct,mine,an){
   <footer>作:omicreate ・ 結果はお遊びです${PRIVACY_HTML}</footer>`;
   document.getElementById("again").onclick=()=>{if(an){gans=[];gQuestion();}else{picks=[];question();}};
   const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];gQuestion();};
+  const cardP=cardPng(k,pct).catch(()=>null);
+  cardP.then(b=>{if(!b||!document.getElementById("cardimg"))return;const im=document.getElementById("cardimg");im.src=URL.createObjectURL(b);im.hidden=false;});
+  document.getElementById("saveimg").onclick=async()=>{const b=await cardP;if(b)sendCard(b,k,text);};
   document.getElementById("copy").onclick=()=>{
     const done=()=>{document.getElementById("copied").hidden=false};
     const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("sharetext"));

@@ -11,7 +11,7 @@
 | start | 診断を始めた | mode(quick/deep) | 開いた→始めた率 |
 | complete | 最後まで答えた | mode・type・top軸 | 完走率、タイプの偏り |
 | quit | 途中で閉じた | mode・n(何問目まで) | どこで離れるか |
-| share | 共有ボタン | target(threads/copy) | 共有の押された数(**投稿された数ではない**) |
+| share | 共有ボタン | target(threads/copy/image) | 共有の押された数(**投稿された数ではない**) |
 | follow | フォロー導線 | target(ig/threads) | 導線の強さ |
 | sister | 姉妹アプリのカード | asobi | 回遊 |
 
