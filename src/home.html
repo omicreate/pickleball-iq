@@ -50,7 +50,7 @@ a{color:inherit}
 </section>
 <footer class="foot">
   <p>ピックルボールの短い動画は <a href="https://www.instagram.com/pickleballiq_jp/" target="_blank" rel="noopener">Instagram</a>・<a href="https://www.threads.net/@pickleballiq_jp" target="_blank" rel="noopener">Threads</a> の @pickleballiq_jp で配信しています。</p>
-  <p>ログインや名前の登録はありません。</p>
+  <p>ログインや名前の登録はありません。開いた回数だけを匿名で数えています。</p>
   <p>© omicreate</p>
 </footer>
 </div>
@@ -64,6 +64,15 @@ var TOOLS=[
   var q=location.search, list=document.getElementById("tools");
   // 古いリンク(/#タイプ)は診断へ。?src= の印は道具側へ引き継ぐ(集計は道具側で数える)
   if(location.hash.length>1){location.replace("shindan/"+q+location.hash);return}
+  // 入口を開いた回数(ev=home)を匿名で数える。決まりは診断と同じ(公開URLだけ・DNT/GPC・?nocount)
+  try{
+    var sp=new URLSearchParams(q), src=sp.get("src")||"", n=sp.get("nocount");
+    if(n==="1")localStorage.setItem("pbiq:nocount","1"); if(n==="0")localStorage.removeItem("pbiq:nocount");
+    if(!/^[A-Za-z0-9_-]{1,40}$/.test(src))src="";
+    var off=location.hostname!=="omicreate.github.io"||navigator.doNotTrack==="1"||navigator.globalPrivacyControl===true||localStorage.getItem("pbiq:nocount")==="1";
+    if(!off){var u="%%COUNTER_URL%%?"+new URLSearchParams(Object.assign({app:"pickleball-iq",ev:"home",v:"%%APP_V%%"},src?{src:src}:{}));
+      if(!(navigator.sendBeacon&&navigator.sendBeacon(u)))fetch(u,{mode:"no-cors",credentials:"omit",cache:"no-store",keepalive:true,referrerPolicy:"no-referrer"}).catch(function(){});}
+  }catch(e){}
   list.innerHTML=TOOLS.map(function(t){return '<li><a class="tool-card" id="'+t.id+'" href="'+t.path+q+'"><div class="tv" aria-hidden="true">'+t.visual+'</div><div class="tool-text"><h2>'+t.name+'</h2><p>'+t.lead+'</p></div><svg class="chev" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg></a></li>'}).join("");
 })();
 </script></body></html>

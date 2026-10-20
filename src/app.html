@@ -186,10 +186,11 @@ const TH_URL = "https://www.threads.net/@pickleballiq_jp";
 const typeUrl = k => SITE + "t/" + k + "/?src=share";
 
 // ---- 匿名の回数だけを数える(Apps Script→スプレッドシート。姉妹アプリと同じ受け口) ----
-// 送るのは「できごと(open/start/finish)・タイプ・さくっと/ガチ・リンクの印(?src=)・版」だけ。回答の中身・名前・端末IDは送らない。
+// 送るのは「できごと(open/start/finish/share)・タイプ・さくっと/ガチ(共有は共有先)・リンクの印(?src=)・版」だけ。回答の中身・名前・端末IDは送らない。
 // 公開URL以外(手元・試遊)では送らない。ブラウザの「追跡しない」(DNT/GPC)がオンのときも送らない。
+// 作り手の端末は ?nocount=1 で一度開くと以後送らない(?nocount=0 で戻す)。自分の試し打ちで数字を汚さないため。
 const COUNTER_URL = "https://script.google.com/macros/s/AKfycbwZ7leA3EVJYlJR3Ia7GLGFxui8NBSy1Npc-fDVkXUHPiEc4b_LM1T-G9w6tr88zXA/exec";
-const APP_V = "1.0";
+const APP_V = "1.1";
 const counter = (() => {
   let src = "", opened = false;
   const clean = v => v && /^[A-Za-z0-9_-]{1,40}$/.test(v) ? v : "";
@@ -200,9 +201,15 @@ const counter = (() => {
     if (fromUrl) sessionStorage.setItem("pbiq:src", fromUrl);
     src = fromUrl || clean(sessionStorage.getItem("pbiq:src"));
   } catch (e) { src = ""; }
+  try {
+    const n = new URL(location.href).searchParams.get("nocount");
+    if (n === "1") localStorage.setItem("pbiq:nocount", "1");
+    if (n === "0") localStorage.removeItem("pbiq:nocount");
+  } catch (e) { /* 保存できない端末では何もしない */ }
   const on = () => {
     try {
       if (location.hostname !== new URL(SITE).hostname) return false;
+      try { if (localStorage.getItem("pbiq:nocount") === "1") return false; } catch (e) {}
       return !(navigator.doNotTrack === "1" || navigator.globalPrivacyControl === true);
     } catch (e) { return false; }
   };
@@ -218,7 +225,9 @@ const counter = (() => {
   return {
     open(type) { if (opened) return; opened = true; send("open", type ? { type } : {}); },
     start(mode) { send("start", { mode }); },
-    finish(type, mode) { send("finish", { type, mode }); }
+    finish(type, mode) { send("finish", { type, mode }); },
+    // 共有ボタンを押した(image=画像でシェア・保存 / threads=Threadsに投稿 / copy=文章をコピー)
+    share(type, mode) { send("share", { type, mode }); }
   };
 })();
 
@@ -526,7 +535,7 @@ function intro(){
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(null)}
   <a class="box" href="${SISTER_URL}" style="text-decoration:none;color:inherit;display:block"><span class="tag green">姉妹アプリ</span><h3 style="margin-top:8px">ピクルくんとあそぼ</h3><p style="font-size:14px;font-weight:700">親子・なかまで遊べるミニゲーム集。</p></a>
-  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数とタイプの数だけを匿名で数えています(回答の中身は送りません)</footer>`;
+  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数・タイプ・共有ボタンを押した回数だけを匿名で数えています(回答の中身は送りません)</footer>`;
   document.getElementById("start").onclick=()=>{picks=[];counter.start("quick");question();};
   document.getElementById("gstart").onclick=()=>{gans=[];counter.start("deep");gQuestion();};
   bindDex();
@@ -671,7 +680,7 @@ function result(k,pct,mine,an){
     <p class="note">画像は端末の中で作られ、送信されません。プレビューの長押しでも保存できます。</p>
     <div class="share" id="sharetext">${text}</div>
     <div class="row">
-      <a class="btn blue" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
+      <a class="btn blue" id="thpost" target="_blank" rel="noopener" href="https://www.threads.net/intent/post?text=${encodeURIComponent(text)}">Threadsに投稿</a>
       <button class="btn white" id="copy">文章をコピー(Instagram用)</button>
     </div>
     <p id="copied" hidden>コピーしました。</p>
@@ -682,13 +691,15 @@ function result(k,pct,mine,an){
   ${an?"":`<button class="btn white" id="godeep">ガチ分析(30問)でくわしく見る</button>`}
   <div class="dex-head"><h2>タイプ図鑑</h2><span class="tag pink">全30種</span></div>
   ${dex(k)}
-  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数とタイプの数だけを匿名で数えています(回答の中身は送りません)</footer>`;
+  <footer>作:omicreate ・ 結果はお遊びです<br>開いた回数・タイプ・共有ボタンを押した回数だけを匿名で数えています(回答の中身は送りません)</footer>`;
   document.getElementById("again").onclick=()=>{if(an){gans=[];counter.start("deep");gQuestion();}else{picks=[];counter.start("quick");question();}};
   const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];counter.start("deep");gQuestion();};
   const cardP=cardPng(k,pct).catch(()=>null);
   cardP.then(b=>{if(!b||!document.getElementById("cardimg"))return;const im=document.getElementById("cardimg");im.src=URL.createObjectURL(b);im.hidden=false;});
-  document.getElementById("saveimg").onclick=async()=>{const b=await cardP;if(b)sendCard(b,k,text);};
+  document.getElementById("saveimg").onclick=async()=>{counter.share(k,"image");const b=await cardP;if(b)sendCard(b,k,text);};
+  document.getElementById("thpost").addEventListener("click",()=>counter.share(k,"threads"));
   document.getElementById("copy").onclick=()=>{
+    counter.share(k,"copy");
     const done=()=>{document.getElementById("copied").hidden=false};
     const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("sharetext"));
       const s=getSelection();s.removeAllRanges();s.addRange(r);};
