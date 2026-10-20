@@ -40,7 +40,9 @@ export function build(out = path.join(root, "dist")) {
   fs.mkdirSync(out, { recursive: true });
   const w = (p, c) => { fs.mkdirSync(path.dirname(path.join(out, p)), { recursive: true }); fs.writeFileSync(path.join(out, p), c); };
 
-  w("index.html", fs.readFileSync(path.join(root, "src/home.html"), "utf8").replaceAll("%%SITE%%", SITE));
+  // 入口の集計先と版は診断と同じ値を使う(二重管理しない)
+  const COUNTER = src.match(/const COUNTER_URL = "([^"]+)"/)[1], APPV = src.match(/const APP_V = "([^"]+)"/)[1];
+  w("index.html", fs.readFileSync(path.join(root, "src/home.html"), "utf8").replaceAll("%%SITE%%", SITE).replaceAll("%%COUNTER_URL%%", COUNTER).replaceAll("%%APP_V%%", APPV));
   w("shindan/index.html", page({
     root: "../", url: SITE + "shindan/",
     title: "ピックルボールタイプ診断｜あなたはコートのどこに住む？",
