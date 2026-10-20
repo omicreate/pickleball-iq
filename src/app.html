@@ -186,7 +186,7 @@ const TH_URL = "https://www.threads.net/@pickleballiq_jp";
 const typeUrl = k => SITE + "t/" + k + "/?src=share";
 
 // ---- 匿名の回数だけを数える(Apps Script→スプレッドシート。姉妹アプリと同じ受け口) ----
-// 送るのは「できごと(open/start/finish/share)・タイプ・さくっと/ガチ(共有は共有先)・リンクの印(?src=)・版」だけ。回答の中身・名前・端末IDは送らない。
+// 送るのは「できごと(open/start/finish/share)・タイプ・さくっと/ガチ・共有先・リンクの印(?src=)・版」だけ。共有では出たタイプは送らない。回答の中身・名前・端末IDは送らない。
 // 公開URL以外(手元・試遊)では送らない。ブラウザの「追跡しない」(DNT/GPC)がオンのときも送らない。
 // 作り手の端末は ?nocount=1 で一度開くと以後送らない(?nocount=0 で戻す)。自分の試し打ちで数字を汚さないため。
 const COUNTER_URL = "https://script.google.com/macros/s/AKfycbwZ7leA3EVJYlJR3Ia7GLGFxui8NBSy1Npc-fDVkXUHPiEc4b_LM1T-G9w6tr88zXA/exec";
@@ -227,7 +227,8 @@ const counter = (() => {
     start(mode) { send("start", { mode }); },
     finish(type, mode) { send("finish", { type, mode }); },
     // 共有ボタンを押した(image=画像でシェア・保存 / threads=Threadsに投稿 / copy=文章をコピー)
-    share(type, mode) { send("share", { type, mode }); }
+    // 出たタイプは送らない(結果の中身にあたるため。共有先だけ)
+    share(mode) { send("share", { mode }); }
   };
 })();
 
@@ -696,10 +697,10 @@ function result(k,pct,mine,an){
   const gd=document.getElementById("godeep"); if(gd) gd.onclick=()=>{gans=[];counter.start("deep");gQuestion();};
   const cardP=cardPng(k,pct).catch(()=>null);
   cardP.then(b=>{if(!b||!document.getElementById("cardimg"))return;const im=document.getElementById("cardimg");im.src=URL.createObjectURL(b);im.hidden=false;});
-  document.getElementById("saveimg").onclick=async()=>{counter.share(k,"image");const b=await cardP;if(b)sendCard(b,k,text);};
-  document.getElementById("thpost").addEventListener("click",()=>counter.share(k,"threads"));
+  document.getElementById("saveimg").onclick=async()=>{counter.share("image");const b=await cardP;if(b)sendCard(b,k,text);};
+  document.getElementById("thpost").addEventListener("click",()=>counter.share("threads"));
   document.getElementById("copy").onclick=()=>{
-    counter.share(k,"copy");
+    counter.share("copy");
     const done=()=>{document.getElementById("copied").hidden=false};
     const sel=()=>{const r=document.createRange();r.selectNodeContents(document.getElementById("sharetext"));
       const s=getSelection();s.removeAllRanges();s.addRange(r);};
