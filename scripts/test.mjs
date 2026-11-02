@@ -22,11 +22,14 @@ for (const k of L.KEYS) {
 }
 assert.equal(titles.size, 30, "題名は30種すべて別");
 assert.ok(read("index.html").includes('href="./fonts.css"'));
+assert.ok(read("index.html").includes("script.google.com/macros/") && read("index.html").includes('ev:"home"'), "入口の集計");
+assert.ok(read("index.html").includes('path:"shindan/"') && !read("index.html").includes("%%"), "入口から診断へ");
+assert.ok(read("shindan/index.html").includes('href="../fonts.css"') && !read("shindan/index.html").includes("%%"));
 assert.ok(fs.existsSync(path.join(out, "og.png")) && fs.statSync(path.join(out, "og.png")).size > 10000);
-assert.equal((read("sitemap.xml").match(/<loc>/g) || []).length, 31);
+assert.equal((read("sitemap.xml").match(/<loc>/g) || []).length, 32);
 
 // 2. 書体は同梱(外部の Google Fonts を読まない)
-assert.ok(!read("index.html").includes("fonts.googleapis.com"));
+assert.ok(!read("shindan/index.html").includes("fonts.googleapis.com"));
 assert.ok(!read("fonts.css").includes("fonts.gstatic.com"));
 for (const m of read("fonts.css").matchAll(/url\((fonts\/[^)]+)\)/g)) assert.ok(fs.existsSync(path.join(out, m[1])), m[1]);
 
@@ -43,12 +46,19 @@ assert.ok(app.includes('typeUrl = k => SITE + "t/" + k + "/?src=share"'));
 // 6'. 診断が終わったときに、出たタイプ(結果)は送らない
 assert.ok(app.includes('finish(mode) { send("finish", { mode }); }') && !app.includes("counter.finish(r.key"), "finish は出たタイプを送らない");
 // 6. 計測の約束: 他社の解析・広告は入れない。送り先は自分の Apps Script だけ。説明の画面・「送らない」・初回のお知らせがある
-for (const f of ["index.html", `t/${L.KEYS[0]}/index.html`]) {
+for (const f of ["shindan/index.html", `t/${L.KEYS[0]}/index.html`]) {
   const h = read(f);
   for (const bad of ["google-analytics", "googletagmanager", "gtag(", "fbq(", "connect.facebook", "clarity.ms", "hotjar", "doubleclick"]) assert.ok(!h.includes(bad), `${f}: 他社の解析・広告 ${bad}`);
   const hosts = new Set([...h.matchAll(/https:\/\/([a-z0-9.-]+)\/macros\//g)].map(m => m[1]));
   assert.deepEqual([...hosts], ["script.google.com"], `${f}: 計測の送り先`);
   assert.ok(h.includes("プライバシーと計測") && h.includes('"pbiq-track-off"') && h.includes('aria-label","計測のお知らせ"'), `${f}: 説明・送らない・お知らせ`);
 }
-assert.ok(read("index.html").includes('const ROOT = "./"') && read(`t/${L.KEYS[0]}/index.html`).includes('const ROOT = "../../"'), "説明へのリンクの根");
+assert.ok(read("shindan/index.html").includes('const ROOT = "../"') && read(`t/${L.KEYS[0]}/index.html`).includes('const ROOT = "../../"'), "説明へのリンクの根");
+// 入口のページ: 他社の解析なし・送り先は自分の Apps Script だけ・説明へのリンクと「送らない」を守る
+{
+  const h = read("index.html");
+  for (const bad of ["google-analytics", "googletagmanager", "gtag(", "fbq(", "connect.facebook", "clarity.ms", "hotjar", "doubleclick"]) assert.ok(!h.includes(bad), `index.html: 他社の解析・広告 ${bad}`);
+  assert.deepEqual([...new Set([...h.matchAll(/https:\/\/([a-z0-9.-]+)\/macros\//g)].map(m => m[1]))], ["script.google.com"], "index.html: 計測の送り先");
+  assert.ok(h.includes('href="shindan/#privacy"') && h.includes('"pbiq-track-off"'), "index.html: 説明へのリンク・送らない");
+}
 console.log("OK: 実ページ30・題名30種・書体同梱・全30タイプ(さくっと/ガチ)・計測の約束");

@@ -22,18 +22,19 @@ for (const w of [360, 400]) {
   p.on("pageerror", e => bad.push(`${w}: ${e.message}`)); p.on("console", m => m.type() === "error" && bad.push(`${w}: ${m.text()}`));
   const noOverflow = async tag => assert.ok(await p.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `${w}px はみ出し: ${tag}`);
   // さくっと診断
-  await p.goto(base); await noOverflow("top"); await p.click("#start");
+  await p.goto(base); await noOverflow("home"); assert.equal(await p.locator(".tool-card").count(), 2); await p.click("#shindan"); await p.waitForSelector("#start"); await noOverflow("top"); await p.click("#start");
   for (let i = 0; i < 10; i++) { await p.click(".opt >> nth=" + (i % 4)); await p.waitForTimeout(260); }
   await p.waitForSelector(".card"); await noOverflow("result");
+  await p.waitForSelector("#cardimg:not([hidden])"); assert.deepEqual(await p.evaluate(() => [cardimg.naturalWidth, cardimg.naturalHeight]), [1080, 1350], "結果カード画像のサイズ"); assert.ok(await p.locator("#saveimg").count() === 1); assert.equal(await p.locator('a[href*="x.com/intent"]').count(), 0, "Xボタンが残っている");
   const share = await p.textContent("#sharetext"); assert.match(share, /#ピックルボール診断/); assert.match(share, /omicreate\.github\.io\/pickleball-iq\/t\/[a-z]{3}-[a-z]{3}\/\?src=share/);
   assert.ok(await p.locator('a[href*="threads.net/intent/post"]').count() === 1); assert.ok(await p.locator('a[href*="instagram.com/pickleballiq_jp"]').count() === 1);
   // ガチ分析
-  await p.goto(base); await p.click("#gstart");
+  await p.goto(base + "shindan/"); await p.click("#gstart");
   for (let i = 0; i < 30; i++) { await p.click(".lk.l" + (i % 5)); await p.waitForTimeout(210); }
   await p.waitForSelector(".report"); await noOverflow("report");
   // タイプ別の実ページ(30枚すべて)
   for (const k of ["pow-sta", "vib-nrd", "trk-nrd"]) { await p.goto(base + `t/${k}/`); await p.waitForSelector(".card"); await noOverflow("t/" + k); }
-  await p.goto(base + "#luv-vib"); await p.waitForSelector(".card");
+  await p.goto(base + "shindan/#luv-vib"); await p.waitForSelector(".card");
   await p.close();
 }
 // 計測の約束: 説明の画面・「送らない」が残る・初回のお知らせは一度閉じたら出ない
@@ -41,23 +42,23 @@ for (const w of [360, 400]) {
   const p3 = await b.newPage({ viewport: { width: 360, height: 800 } }); const errs = [];
   p3.on("pageerror", e => errs.push(e.message));
   const noOverflow = async tag => assert.ok(await p3.evaluate(() => document.documentElement.scrollWidth <= innerWidth + 1), `はみ出し: ${tag}`);
-  await p3.goto(base + "#notice-test");
+  await p3.goto(base + "shindan/#notice-test");
   const notice = p3.locator('aside[aria-label="計測のお知らせ"]');
   assert.equal(await notice.count(), 1); await noOverflow("notice");
   await notice.locator('button[aria-label="お知らせを閉じる"]').click(); assert.equal(await notice.count(), 0);
-  await p3.goto(base + "#notice-test"); assert.equal(await notice.count(), 0, "閉じたら次から出ない");
-  await p3.goto(base); await p3.click("footer a[data-privacy]");
+  await p3.goto(base + "shindan/#notice-test"); assert.equal(await notice.count(), 0, "閉じたら次から出ない");
+  await p3.goto(base + "shindan/"); await p3.click("footer a[data-privacy]");
   await p3.waitForSelector("h1:has-text('プライバシーと計測')"); await noOverflow("privacy");
   assert.equal(await p3.getAttribute("#pvon", "aria-checked"), "true");
   await p3.click("#pvoff"); assert.equal(await p3.getAttribute("#pvoff", "aria-checked"), "true");
-  await p3.goto(base + "#privacy"); assert.equal(await p3.getAttribute("#pvoff", "aria-checked"), "true", "送らない が残る");
+  await p3.goto(base + "shindan/#privacy"); assert.equal(await p3.getAttribute("#pvoff", "aria-checked"), "true", "送らない が残る");
   assert.equal(await p3.evaluate(() => localStorage.getItem("pbiq-track-off")), "1");
   await p3.click("#pvback"); await p3.waitForSelector("#start");
   // タイプ紹介ページからも説明に行ける
   await p3.goto(base + "t/pow-sta/"); await p3.click("footer a[data-privacy]"); await p3.waitForSelector("h1:has-text('プライバシーと計測')");
   assert.deepEqual(errs, []); await p3.close();
 }
-const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => fails.push("req " + r.url()));
+const p2 = await b.newPage(); const fails = []; p2.on("pageerror", e => fails.push(e.message)); p2.on("requestfailed", r => { if (!r.url().startsWith("blob:")) fails.push("req " + r.url()); }); // 結果カード画像のプレビュー(blob)は、ページ移動で中断されるのが正常
 const { L } = await import("./build.mjs");
 for (const k of L.KEYS) { await p2.goto(base + `t/${k}/`); await p2.waitForSelector(".card .card-name"); const n = await p2.textContent(".card-name"); assert.equal(n.replace(/\s/g, ""), L.pn(k)); }
 assert.deepEqual(fails, [], "30ページの読み込み失敗: " + fails.join(","));
